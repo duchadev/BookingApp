@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
+  role: { type: String, required: true }
 });
 
 userSchema.pre("save", async function (next) {
@@ -15,7 +16,7 @@ userSchema.pre("save", async function (next) {
   }
   next();
 });
-
+ 
 const User = mongoose.model<UserType>("User", userSchema);
 
 export default User;

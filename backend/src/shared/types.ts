@@ -4,6 +4,7 @@ export type UserType = {
   password: string;
   firstName: string;
   lastName: string;
+  role: string;
 };
 
 export type HotelType = {
@@ -22,6 +23,7 @@ export type HotelType = {
   imageUrls: string[];
   lastUpdated: Date;
   bookings: BookingType[];
+  status: string;
 };
 
 export type BookingType = {
