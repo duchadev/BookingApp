@@ -37,8 +37,8 @@ router.post(
       return res.status(400).json({ message: errors.array() });
     }
     if (!req.body) {
-  return res.status(400).json({ message: "Invalid JSON input" });
-}
+      return res.status(400).json({ message: "Invalid JSON input" });
+    }
 
     try {
       let user = await User.findOne({
@@ -49,7 +49,10 @@ router.post(
         return res.status(400).json({ message: "User already exists" });
       }
 
-      user = new User(req.body);
+      user = new User({
+        ...req.body,
+        role: "user",
+      });
       await user.save();
 
       const token = jwt.sign(

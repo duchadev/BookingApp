@@ -45,7 +45,7 @@ router.post(
       newHotel.imageUrls = imageUrls;
       newHotel.lastUpdated = new Date();
       newHotel.userId = req.userId;
-
+      newHotel.status = "OFF";
       const hotel = new Hotel(newHotel);
       await hotel.save();
 

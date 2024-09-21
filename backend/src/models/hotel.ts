@@ -28,6 +28,7 @@ const hotelSchema = new mongoose.Schema<HotelType>({
   imageUrls: [{ type: String, required: true }],
   lastUpdated: { type: Date, required: true },
   bookings: [bookingSchema],
+  status: { type: String, required: true },
 });
 
 const Hotel = mongoose.model<HotelType>("Hotel", hotelSchema);
