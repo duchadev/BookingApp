@@ -5,6 +5,7 @@ import "./index.css";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { AppContextProvider } from "./contexts/AppContext";
 import { SearchContextProvider } from "./contexts/SearchContext";
+import { PrimeReactProvider } from "primereact/api";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -15,12 +16,14 @@ const queryClient = new QueryClient({
 });
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <AppContextProvider>
-        <SearchContextProvider>
-          <App />
-        </SearchContextProvider>
-      </AppContextProvider>
-    </QueryClientProvider>
+    <PrimeReactProvider>
+      <QueryClientProvider client={queryClient}>
+        <AppContextProvider>
+          <SearchContextProvider>
+            <App />
+          </SearchContextProvider>
+        </AppContextProvider>
+      </QueryClientProvider>
+    </PrimeReactProvider>
   </React.StrictMode>
 );

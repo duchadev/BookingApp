@@ -1,13 +1,13 @@
 import express, { Request, Response } from "express";
 import { check, validationResult } from "express-validator";
-import User from "../models/user";
+import User from "../models/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import verifyToken from "../middleware/auth";
+import { verifyToken } from "../middleware/auth";
 
-const router = express.Router();
+const authRoutes = express.Router();
 
-router.post(
+authRoutes.post(
   "/login",
   [
     check("email", "Email is required").isEmail(),
@@ -63,15 +63,19 @@ router.post(
   }
 );
 
-router.get("/validate-token", verifyToken, (req: Request, res: Response) => {
-  res.status(200).send({ userId: req.userId });
-});
+authRoutes.get(
+  "/validate-token",
+  verifyToken,
+  (req: Request, res: Response) => {
+    res.status(200).send({ userId: req.userId, role: req.role });
+  }
+);
 
-router.post("/logout", (req: Request, res: Response) => {
+authRoutes.post("/logout", (req: Request, res: Response) => {
   res.cookie("auth_token", "", {
     expires: new Date(0),
   });
   res.send();
 });
 
-export default router;
+export default authRoutes;

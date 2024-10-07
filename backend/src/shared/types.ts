@@ -1,3 +1,5 @@
+import { ObjectId } from "mongoose";
+
 export type UserType = {
   _id: string;
   email: string;
@@ -5,38 +7,51 @@ export type UserType = {
   firstName: string;
   lastName: string;
   role: string;
+  phone: string;
+  status: "Active" | "Inactive" | "Banned"; // user status
 };
 
+// RoomType Schema
+export type RoomType = {
+  _id: string;
+  hotelId: ObjectId;
+  type: string; // Single, Double, Suite, etc.
+  capacity: number; // Maximum capacity for people
+  pricePerNight: number;
+  imageUrls: string[];
+  description?: string; // Optional description for each room type
+  status: "Booked" | "Available";
+};
+
+// HotelType Schema
 export type HotelType = {
   _id: string;
-  userId: string;
+  userId: ObjectId;
   name: string;
-  city: string;
+  address: string;
   country: string;
+  city: string;
   description: string;
   type: string;
-  adultCount: number;
-  childCount: number;
+  maxAdultCount: number;
+  maxChildCount: number;
   facilities: string[];
-  pricePerNight: number;
   starRating: number;
-  imageUrls: string[];
-  lastUpdated: Date;
-  bookings: BookingType[];
-  status: string;
+  imageUrls: string[]; // Array of hotel image URLs
+  verify: string;
 };
 
 export type BookingType = {
   _id: string;
-  userId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
+  userId: ObjectId; // User making the booking
+  hotelId: ObjectId; // Hotel being booked
+  roomTypeId: ObjectId; // Specific room type being booked
   adultCount: number;
   childCount: number;
   checkIn: Date;
   checkOut: Date;
   totalCost: number;
+  status: string; // "pending" | "confirmed" | "canceled" | "completed";
 };
 
 export type HotelSearchResponse = {

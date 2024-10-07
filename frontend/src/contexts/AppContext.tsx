@@ -1,25 +1,20 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Toast from "../components/Toast";
 import { useQuery } from "react-query";
 import * as apiClient from "../api-client";
-import { loadStripe, Stripe } from "@stripe/stripe-js";
-
-const STRIPE_PUB_KEY = import.meta.env.VITE_STRIPE_PUB_KEY || "";
 
 type ToastMessage = {
   message: string;
   type: "SUCCESS" | "ERROR";
 };
 
-type AppContext = {
+type AppContextType = {
   showToast: (toastMessage: ToastMessage) => void;
   isLoggedIn: boolean;
-  stripePromise: Promise<Stripe | null>;
+  role: string | null;
 };
 
-const AppContext = React.createContext<AppContext | undefined>(undefined);
-
-const stripePromise = loadStripe(STRIPE_PUB_KEY);
+const AppContext = React.createContext<AppContextType | undefined>(undefined);
 
 export const AppContextProvider = ({
   children,
@@ -27,19 +22,53 @@ export const AppContextProvider = ({
   children: React.ReactNode;
 }) => {
   const [toast, setToast] = useState<ToastMessage | undefined>(undefined);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
 
+  // Khi component mount, lấy lại trạng thái từ localStorage
+  useEffect(() => {
+    const savedIsLoggedIn = localStorage.getItem("isLoggedIn");
+    const savedRole = localStorage.getItem("role");
+
+    if (savedIsLoggedIn === "true") {
+      setIsLoggedIn(true);
+      setRole(savedRole);
+    }
+  }, []);
+
+  // Sử dụng react-query để xác thực token
   const { isError } = useQuery("validateToken", apiClient.validateToken, {
     retry: false,
+    onSuccess: (data) => {
+      // Giả sử API trả về vai trò người dùng trong data
+      console.log("AppContext: Token validation success", data);
+      setIsLoggedIn(true);
+      setRole(data?.role || null);
+      // Lưu trạng thái vào localStorage
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("role", data?.role || "");
+    },
+    onError: () => {
+      console.log("AppContext: Token validation failed");
+      // Xóa thông tin đăng nhập khi token không hợp lệ
+      setIsLoggedIn(false);
+      setRole(null);
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("role");
+    },
   });
+
+  // Hàm hiển thị thông báo
+  const showToast = (toastMessage: ToastMessage) => {
+    setToast(toastMessage);
+  };
 
   return (
     <AppContext.Provider
       value={{
-        showToast: (toastMessage) => {
-          setToast(toastMessage);
-        },
-        isLoggedIn: !isError,
-        stripePromise,
+        showToast,
+        isLoggedIn: !isError && isLoggedIn,
+        role,
       }}
     >
       {toast && (
@@ -54,7 +83,11 @@ export const AppContextProvider = ({
   );
 };
 
+// Custom hook để sử dụng AppContext
 export const useAppContext = () => {
   const context = useContext(AppContext);
-  return context as AppContext;
+  if (!context) {
+    throw new Error("useAppContext must be used within an AppContextProvider");
+  }
+  return context;
 };

@@ -9,7 +9,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import { useAppContext } from "../contexts/AppContext";
 
 const Booking = () => {
-  const { stripePromise } = useAppContext();
+  // const { stripePromise } = useAppContext();
   const search = useSearchContext();
   const { hotelId } = useParams();
 
@@ -64,18 +64,23 @@ const Booking = () => {
         numberOfNights={numberOfNights}
         hotel={hotel}
       />
+      <div className="ml-7">Booking Payment form</div>
       {currentUser && paymentIntentData && (
-        <Elements
-          stripe={stripePromise}
-          options={{
-            clientSecret: paymentIntentData.clientSecret,
-          }}
-        >
-          <BookingForm
-            currentUser={currentUser}
-            paymentIntent={paymentIntentData}
-          />
-        </Elements>
+        // <Elements
+        //   stripe={stripePromise}
+        //   options={{
+        //     clientSecret: paymentIntentData.clientSecret,
+        //   }}
+        // >
+        //   <BookingForm
+        //     currentUser={currentUser}
+        //     paymentIntent={paymentIntentData}
+        //   />
+        // </Elements>
+        <BookingForm
+          currentUser={currentUser}
+          paymentIntent={paymentIntentData}
+        />
       )}
     </div>
   );

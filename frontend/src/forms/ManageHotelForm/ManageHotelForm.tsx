@@ -9,17 +9,18 @@ import { useEffect } from "react";
 
 export type HotelFormData = {
   name: string;
+  address: string;
   city: string;
   country: string;
   description: string;
   type: string;
-  pricePerNight: number;
-  starRating: number;
+  maxAdultCount: number;
+  maxChildCount: number;
+  // pricePerNight: number;
+  // starRating: number;
   facilities: string[];
   imageFiles: FileList;
   imageUrls: string[];
-  adultCount: number;
-  childCount: number;
 };
 
 type Props = {
@@ -46,10 +47,10 @@ const ManageHotelForm = ({ onSave, isLoading, hotel }: Props) => {
     formData.append("country", formDataJson.country);
     formData.append("description", formDataJson.description);
     formData.append("type", formDataJson.type);
-    formData.append("pricePerNight", formDataJson.pricePerNight.toString());
-    formData.append("starRating", formDataJson.starRating.toString());
-    formData.append("adultCount", formDataJson.adultCount.toString());
-    formData.append("childCount", formDataJson.childCount.toString());
+    // formData.append("pricePerNight", formDataJson.pricePerNight.toString());
+    // formData.append("starRating", formDataJson.starRating.toString());
+    formData.append("maxAdultCount", formDataJson.maxAdultCount.toString());
+    formData.append("maxChildCount", formDataJson.maxChildCount.toString());
 
     formDataJson.facilities.forEach((facility, index) => {
       formData.append(`facilities[${index}]`, facility);
@@ -65,6 +66,7 @@ const ManageHotelForm = ({ onSave, isLoading, hotel }: Props) => {
       formData.append(`imageFiles`, imageFile);
     });
 
+    // console.log(formDataJson);
     onSave(formData);
   });
 

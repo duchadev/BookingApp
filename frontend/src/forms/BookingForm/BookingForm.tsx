@@ -3,7 +3,7 @@ import {
   PaymentIntentResponse,
   UserType,
 } from "../../../../backend/src/shared/types";
-import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
+// import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { StripeCardElement } from "@stripe/stripe-js";
 import { useSearchContext } from "../../contexts/SearchContext";
 import { useParams } from "react-router-dom";
@@ -30,8 +30,8 @@ export type BookingFormData = {
 };
 
 const BookingForm = ({ currentUser, paymentIntent }: Props) => {
-  const stripe = useStripe();
-  const elements = useElements();
+  // const stripe = useStripe();
+  // const elements = useElements();
 
   const search = useSearchContext();
   const { hotelId } = useParams();
@@ -66,19 +66,17 @@ const BookingForm = ({ currentUser, paymentIntent }: Props) => {
   });
 
   const onSubmit = async (formData: BookingFormData) => {
-    if (!stripe || !elements) {
-      return;
-    }
-
-    const result = await stripe.confirmCardPayment(paymentIntent.clientSecret, {
-      payment_method: {
-        card: elements.getElement(CardElement) as StripeCardElement,
-      },
-    });
-
-    if (result.paymentIntent?.status === "succeeded") {
-      bookRoom({ ...formData, paymentIntentId: result.paymentIntent.id });
-    }
+    // if (!stripe || !elements) {
+    //   return;
+    // }
+    // const result = await stripe.confirmCardPayment(paymentIntent.clientSecret, {
+    //   payment_method: {
+    //     card: elements.getElement(CardElement) as StripeCardElement,
+    //   },
+    // });
+    // if (result.paymentIntent?.status === "succeeded") {
+    //   bookRoom({ ...formData, paymentIntentId: result.paymentIntent.id });
+    // }
   };
 
   return (
@@ -125,7 +123,8 @@ const BookingForm = ({ currentUser, paymentIntent }: Props) => {
 
         <div className="bg-blue-200 p-4 rounded-md">
           <div className="font-semibold text-lg">
-            Total Cost: £{paymentIntent.totalCost.toFixed(2)}
+            {/* Total Cost: ${paymentIntent.totalCost.toFixed(2)} */}
+            Total Cost: $300 (chưa fix giá tiền)
           </div>
           <div className="text-xs">Includes taxes and charges</div>
         </div>
@@ -133,10 +132,11 @@ const BookingForm = ({ currentUser, paymentIntent }: Props) => {
 
       <div className="space-y-2">
         <h3 className="text-xl font-semibold"> Payment Details</h3>
-        <CardElement
+        ko cần Payment Details chỗ này
+        {/* <CardElement
           id="payment-element"
           className="border rounded-md p-2 text-sm"
-        />
+        /> */}
       </div>
 
       <div className="flex justify-end">
