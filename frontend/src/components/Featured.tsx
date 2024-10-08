@@ -1,42 +1,77 @@
+import { Skeleton } from "primereact/skeleton";
+import { HotelType } from "../../../backend/src/shared/types";
 import "../assets/css/featured.css";
 
-const Featured = () => {
-  return (
-    <div className="featured">
-      <div className="featuredItem">
-        <img
-          src="https://cf.bstatic.com/xdata/images/city/max500/957801.webp?k=a969e39bcd40cdcc21786ba92826063e3cb09bf307bcfeac2aa392b838e9b7a5&o="
-          alt=""
-          className="featuredImg"
-        />
-        <div className="featuredTitles">
-          <h1>Da Nang</h1>
-          <h2>123 properties</h2>
-        </div>
-      </div>
+// Define the props type
+interface FeaturedProps {
+  hotels: HotelType[] | undefined;
+  isLoading: boolean;
+}
 
-      <div className="featuredItem">
-        <img
-          src="https://cf.bstatic.com/xdata/images/city/max500/690334.webp?k=b99df435f06a15a1568ddd5f55d239507c0156985577681ab91274f917af6dbb&o="
-          alt=""
-          className="featuredImg"
-        />
-        <div className="featuredTitles">
-          <h1>Ha Noi</h1>
-          <h2>533 properties</h2>
-        </div>
-      </div>
-      <div className="featuredItem">
-        <img
-          src="https://cf.bstatic.com/xdata/images/city/max500/689422.webp?k=2595c93e7e067b9ba95f90713f80ba6e5fa88a66e6e55600bd27a5128808fdf2&o="
-          alt=""
-          className="featuredImg"
-        />
-        <div className="featuredTitles">
-          <h1>Ho Chi Minh City</h1>
-          <h2>532 properties</h2>
-        </div>
-      </div>
+const Featured: React.FC<FeaturedProps> = ({ hotels, isLoading }) => {
+  // Loading skeleton template
+  const loadingTemplate = () => {
+    return (
+      <>
+        <Skeleton width="317px" height="250px" className="mb-2"></Skeleton>
+        <Skeleton width="317px" height="250px" className="mb-2"></Skeleton>
+        <Skeleton width="317px" height="250px" className="mb-2"></Skeleton>
+      </>
+    );
+  };
+
+  // Count the number of hotels for each city if hotels data is available
+  const daNangHotelsCount =
+    hotels?.filter((hotel) => hotel.city === "Da Nang").length ?? 0;
+  const haNoiHotelsCount =
+    hotels?.filter((hotel) => hotel.city === "Ha Noi").length ?? 0;
+  const hcmcHotelsCount =
+    hotels?.filter((hotel) => hotel.city === "Ho Chi Minh City").length ?? 0;
+
+  return (
+    <div className="featured pl-8">
+      {isLoading ? (
+        loadingTemplate()
+      ) : (
+        <>
+          {/* Da Nang */}
+          <div className="featuredItem">
+            <img
+              src="https://vietluxtour.com/Upload/images/2024/khamphatrongnuoc/C%E1%BA%A7u%20R%E1%BB%93ng%20%C4%90%C3%A0%20N%E1%BA%B5ng/cau-rong-da-nang%20(7)-min.jpg"
+              alt="Da Nang"
+              className="featuredImg"
+            />
+            <div className="featuredTitles">
+              <h1>Da Nang</h1>
+              <h2>{daNangHotelsCount} properties</h2>
+            </div>
+          </div>
+          {/* Ha Noi */}
+          <div className="featuredItem">
+            <img
+              src="https://lh3.googleusercontent.com/proxy/FiCcFsz2E6iy4_5opG-yoPKcBlRx8VfUlT4ZbhVN2ObCl61eZAMWUxU_JBY-nq_Obw7jj779XuVFdY_-xWQ-AJXqTaDD-tzCUj-htx_hfMmwEwmwozOIEH_aEQ"
+              alt="Ha Noi"
+              className="featuredImg"
+            />
+            <div className="featuredTitles">
+              <h1>Ha Noi</h1>
+              <h2>{haNoiHotelsCount} properties</h2>
+            </div>
+          </div>
+          {/* Ho Chi Minh City */}
+          <div className="featuredItem">
+            <img
+              src="https://acnoshotel.com/hotel/wp-content/uploads/2023/12/Acnos-cho-ben-thanh-04.jpg"
+              alt="Ho Chi Minh City"
+              className="featuredImg"
+            />
+            <div className="featuredTitles">
+              <h1>Ho Chi Minh City</h1>
+              <h2>{hcmcHotelsCount} properties</h2>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

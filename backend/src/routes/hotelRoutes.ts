@@ -181,7 +181,7 @@ hotelRouter.post(
         const imageUrls = await uploadImages(imageFiles);
         newHotel.imageUrls = imageUrls;
       }
-
+      console.log(newHotel);
       const hotel = new Hotel(newHotel);
       const savedHotel = await hotel.save();
 
@@ -198,9 +198,26 @@ hotelRouter.post(
 // Get all hotels (not by userID)
 hotelRouter.get("/", async (req: Request, res: Response) => {
   try {
-    const hotels = await Hotel.find();
-    console.log(hotels);
-    res.json(hotels);
+    // const hotels = await Hotel.find();
+
+    // Lấy danh sách các khách sạn dựa trên userId của người dùng đăng nhập
+    const hotels = await Hotel.find().lean();
+
+    // Sử dụng map để tìm tất cả các phòng liên quan đến từng khách sạn
+    const hotelsWithRooms = await Promise.all(
+      hotels.map(async (hotel) => {
+        const rooms = await Room.find({ hotelId: hotel._id }).lean();
+        return {
+          ...hotel, // Thêm các trường của hotel vào kết quả trả về
+          rooms, // Thêm danh sách rooms vào mỗi hotel
+        };
+      })
+    );
+
+    // Trả về danh sách hotels kèm theo rooms cho từng hotel
+    res.json(hotelsWithRooms);
+
+    // res.json(hotels);
   } catch (error) {
     res
       .status(500)

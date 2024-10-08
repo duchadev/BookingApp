@@ -46,74 +46,80 @@ const MyHotels = () => {
             }
 
             return (
-              <div
+              <Link
+                to={`/detail/${hotel._id}`}
                 key={hotel._id} // Luôn cần thêm key khi render danh sách
-                data-testid="hotel-card"
-                className="flex flex-col justify-between border border-slate-300 rounded-lg p-8 gap-5"
+                // className="relative cursor-pointer overflow-hidden rounded-md"
               >
-                <h2 className="text-2xl font-bold">{hotel.name}</h2>
-                <div className="whitespace-pre-line">{hotel.description}</div>
-                <div className="grid grid-cols-5 gap-2">
-                  <div className="border border-slate-300 rounded-sm p-3 flex items-center">
-                    <BsMap className="mr-1" />
-                    {hotel.city}, {hotel.country}
-                  </div>
-                  <div className="border border-slate-300 rounded-sm p-3 flex items-center">
-                    <BsBuilding className="mr-1" />
-                    {hotel.type}
-                  </div>
-                  {/* Hiển thị minPrice và maxPrice */}
-                  <div className="border border-slate-300 rounded-sm p-3 flex items-center">
-                    <BiMoney className="mr-1" />
-                    {minPrice !== "N/A" ? (
-                      <>
-                        {minPrice.toLocaleString()} -{" "}
-                        {maxPrice.toLocaleString()} VND
-                      </>
-                    ) : (
-                      "N/A"
-                    )}
-                  </div>
-                  <div className="border border-slate-300 rounded-sm p-3 flex items-center">
-                    <BiHotel className="mr-1" />
-                    {hotel.maxAdultCount} adults, {hotel.maxChildCount} children
-                  </div>
-                  <div className="border border-slate-300 rounded-sm p-3 flex items-center">
-                    <span className="flex">
-                      {Array.from({ length: 5 }).map((_, index) => {
-                        if (index < hotel.starRating) {
+                <div
+                  data-testid="hotel-card"
+                  className="flex flex-col justify-between border border-slate-300 rounded-lg p-8 gap-5"
+                >
+                  <h2 className="text-2xl font-bold">{hotel.name}</h2>
+                  <div className="whitespace-pre-line">{hotel.description}</div>
+                  <div className="grid grid-cols-5 gap-2">
+                    <div className="border border-slate-300 rounded-sm p-3 flex items-center">
+                      <BsMap className="mr-1" />
+                      {hotel.city}, {hotel.country}
+                    </div>
+                    <div className="border border-slate-300 rounded-sm p-3 flex items-center">
+                      <BsBuilding className="mr-1" />
+                      {hotel.type}
+                    </div>
+                    {/* Hiển thị minPrice và maxPrice */}
+                    <div className="border border-slate-300 rounded-sm p-3 flex items-center">
+                      <BiMoney className="mr-1" />
+                      {minPrice !== "N/A" ? (
+                        <>
+                          {minPrice.toLocaleString()} -{" "}
+                          {maxPrice.toLocaleString()} VND
+                        </>
+                      ) : (
+                        "N/A"
+                      )}
+                    </div>
+                    <div className="border border-slate-300 rounded-sm p-3 flex items-center">
+                      <BiHotel className="mr-1" />
+                      {hotel.maxAdultCount} adults, {hotel.maxChildCount}{" "}
+                      children
+                    </div>
+                    <div className="border border-slate-300 rounded-sm p-3 flex items-center">
+                      <span className="flex">
+                        {Array.from({ length: 5 }).map((_, index) => {
+                          if (index < hotel.starRating) {
+                            return (
+                              <i
+                                key={index}
+                                className="pi pi-star-fill text-yellow-400"
+                              ></i>
+                            );
+                          }
                           return (
                             <i
                               key={index}
-                              className="pi pi-star-fill text-yellow-400"
+                              className="pi pi-star-fill text-gray-300"
                             ></i>
                           );
-                        }
-                        return (
-                          <i
-                            key={index}
-                            className="pi pi-star-fill text-gray-300"
-                          ></i>
-                        );
-                      })}
-                    </span>
+                        })}
+                      </span>
+                    </div>
                   </div>
+                  <span className="flex justify-end">
+                    <Link
+                      to={`/hotel/${hotel._id}/rooms`}
+                      className="flex bg-green-600 text-white text-xl font-bold p-2 hover:bg-green-500 mr-3"
+                    >
+                      View Rooms
+                    </Link>
+                    <Link
+                      to={`/edit/${hotel._id}`}
+                      className="flex bg-blue-600 text-white text-xl font-bold p-2 hover:bg-blue-500"
+                    >
+                      View Details
+                    </Link>
+                  </span>
                 </div>
-                <span className="flex justify-end">
-                  <Link
-                    to={`/hotel/${hotel._id}/rooms`}
-                    className="flex bg-green-600 text-white text-xl font-bold p-2 hover:bg-green-500 mr-3"
-                  >
-                    View Rooms
-                  </Link>
-                  <Link
-                    to={`/edit/${hotel._id}`}
-                    className="flex bg-blue-600 text-white text-xl font-bold p-2 hover:bg-blue-500"
-                  >
-                    View Details
-                  </Link>
-                </span>
-              </div>
+              </Link>
             );
           })}
         </div>

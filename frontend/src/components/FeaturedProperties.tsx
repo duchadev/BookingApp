@@ -1,65 +1,88 @@
+import { Carousel, CarouselResponsiveOption } from "primereact/carousel";
 import "../assets/css/featuredProperties.css";
+import { HotelType } from "../../../backend/src/shared/types";
+import { Link } from "react-router-dom";
 
-const FeaturedProperties = () => {
+// Define the props type
+interface FeaturedProps {
+  hotels: HotelType[] | undefined;
+}
+
+const FeaturedProperties: React.FC<FeaturedProps> = ({ hotels }) => {
+  const responsiveOptions: CarouselResponsiveOption[] = [
+    {
+      breakpoint: "1400px",
+      numVisible: 2,
+      numScroll: 1,
+    },
+    {
+      breakpoint: "1199px",
+      numVisible: 3,
+      numScroll: 1,
+    },
+    {
+      breakpoint: "767px",
+      numVisible: 2,
+      numScroll: 1,
+    },
+    {
+      breakpoint: "575px",
+      numVisible: 1,
+      numScroll: 1,
+    },
+  ];
+
+  const hotelTemplate = (hotel: HotelType) => {
+    // Tính toán minPrice và maxPrice cho từng khách sạn
+    let minPrice, maxPrice;
+    // console.log(hotel);
+    if (hotel.rooms && hotel.rooms.length > 0) {
+      const prices = hotel.rooms.map((room) => room.pricePerNight);
+      minPrice = Math.min(...prices);
+      maxPrice = Math.max(...prices);
+    } else {
+      minPrice = maxPrice = "N/A"; // Giá trị mặc định nếu không có rooms
+    }
+
+    return (
+      <Link
+        to={`/detail/${hotel._id}`}
+        key={hotel._id} // Luôn cần thêm key khi render danh sách
+        className="relative cursor-pointer overflow-hidden rounded-md"
+      >
+        <div className="fpItem mr-4">
+          <img
+            src={hotel?.imageUrls[0]}
+            alt=""
+            className="fpImg w-full object-cover object-center rounded"
+          />
+          <span className="fpName">{hotel?.name}</span>
+          <span className="fpCity">{hotel?.city}</span>
+          <span className="fpPrice">Starting from ${minPrice}</span>
+          <div className="fpRating">
+            <button>8.9</button>
+            <span>Excellent</span>
+          </div>
+        </div>
+      </Link>
+    );
+  };
+
   return (
-    <div className="fp">
-      <div className="fpItem">
-        <img
-          src="https://cf.bstatic.com/xdata/images/hotel/square600/13125860.webp?k=e148feeb802ac3d28d1391dad9e4cf1e12d9231f897d0b53ca067bde8a9d3355&o=&s=1"
-          alt=""
-          className="fpImg"
+    <>
+      {hotels && (
+        <Carousel
+          value={hotels}
+          numVisible={3}
+          numScroll={3}
+          responsiveOptions={responsiveOptions}
+          itemTemplate={hotelTemplate}
+          className="custom-carousel"
+          circular
+          autoplayInterval={3000}
         />
-        <span className="fpName">Aparthotel Stare Miasto</span>
-        <span className="fpCity">Madrid</span>
-        <span className="fpPrice">Starting from $120</span>
-        <div className="fpRating">
-          <button>8.9</button>
-          <span>Excellent</span>
-        </div>
-      </div>
-      <div className="fpItem">
-        <img
-          src="https://cf.bstatic.com/xdata/images/hotel/max1280x900/215955381.jpg?k=ff739d1d9e0c8e233f78ee3ced82743ef0355e925df8db7135d83b55a00ca07a&o=&hp=1"
-          alt=""
-          className="fpImg"
-        />
-        <span className="fpName">Comfort Suites Airport</span>
-        <span className="fpCity">Austin</span>
-        <span className="fpPrice">Starting from $140</span>
-        <div className="fpRating">
-          <button>9.3</button>
-          <span>Exceptional</span>
-        </div>
-      </div>
-      <div className="fpItem">
-        <img
-          src="https://cf.bstatic.com/xdata/images/hotel/max1280x900/232902339.jpg?k=3947def526b8af0429568b44f9716e79667d640842c48de5e66fd2a8b776accd&o=&hp=1"
-          alt=""
-          className="fpImg"
-        />
-        <span className="fpName">Four Seasons Hotel</span>
-        <span className="fpCity">Lisbon</span>
-        <span className="fpPrice">Starting from $99</span>
-        <div className="fpRating">
-          <button>8.8</button>
-          <span>Excellent</span>
-        </div>
-      </div>
-      <div className="fpItem">
-        <img
-          src="https://cf.bstatic.com/xdata/images/hotel/max1280x900/322658536.jpg?k=3fffe63a365fd0ccdc59210188e55188cdb7448b9ec1ddb71b0843172138ec07&o=&hp=1"
-          alt=""
-          className="fpImg"
-        />
-        <span className="fpName">Hilton Garden Inn</span>
-        <span className="fpCity">Berlin</span>
-        <span className="fpPrice">Starting from $105</span>
-        <div className="fpRating">
-          <button>8.9</button>
-          <span>Excellent</span>
-        </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 };
 
