@@ -61,7 +61,7 @@ usersRouter.post(
       await user.save();
 
       const token = jwt.sign(
-        { userId: user.id },
+        { userId: user.id, role: user.role, email: user.email }, // đkí claims vào token khi register (phải giống vs claims bên login)
         process.env.JWT_SECRET_KEY as string,
         {
           expiresIn: "1d",

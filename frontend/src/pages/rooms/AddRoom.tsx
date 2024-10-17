@@ -70,7 +70,7 @@ const AddRoom = () => {
       label: "Rooms",
       template: () => (
         <>
-          <Link to={`http://localhost:5174/hotel/${hotel?._id}/rooms`}>
+          <Link to={`http://localhost:5174/hotel/${hotel?._id}/rooms/types`}>
             <a className="text-primary">Rooms</a>
           </Link>
         </>

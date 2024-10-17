@@ -8,6 +8,7 @@ const roomSchema = new mongoose.Schema<RoomType>(
       ref: "Hotel",
       required: true,
     },
+    roomNumber: { type: String, required: true }, // Số phòng, có thể là một chuỗi như "101", "202", v.v.
     type: { type: String, required: true }, // Single, Double, Suite
     capacity: { type: Number, required: true }, // Max capacity for people
     pricePerNight: { type: Number, required: true },

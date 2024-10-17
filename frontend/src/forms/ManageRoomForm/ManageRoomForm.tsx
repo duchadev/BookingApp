@@ -7,6 +7,7 @@ import { ObjectId } from "mongoose";
 
 export type RoomFormData = {
   hotelId: ObjectId;
+  roomNumber: string;
   type: string;
   capacity: number;
   pricePerNight: number;
@@ -33,10 +34,12 @@ const ManageRoomForm = ({ onSave, isLoading, room, hotelId }: Props) => {
   const onSubmit = handleSubmit((formDataJson: RoomFormData) => {
     const formData = new FormData();
     if (room) {
+      // using when update
       formData.append("roomId", room._id);
     }
     formDataJson.hotelId = hotelId;
     formData.append("hotelId", formDataJson.hotelId.toString());
+    formData.append("roomNumber", formDataJson.roomNumber);
     formData.append("type", formDataJson.type);
     formData.append("capacity", formDataJson.capacity.toString());
     formData.append("description", formDataJson.description);

@@ -1,14 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import { DataTable, DataTableRowEditCompleteEvent } from "primereact/datatable";
-import { Column, ColumnEditorOptions } from "primereact/column";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import {
-  InputNumber,
-  InputNumberValueChangeEvent,
-} from "primereact/inputnumber";
-import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
-import { Tag } from "primereact/tag";
 import axios from "axios";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -17,48 +10,51 @@ import { Toast } from "primereact/toast";
 import { Toolbar } from "primereact/toolbar";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { deleteRoomById } from "../../api-client";
-import { RoomType } from "../../../../backend/src/shared/types";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
+import { ProgressSpinner } from "primereact/progressspinner";
 
 // Define Room interface
 interface Room {
   _id: string | null;
   hotelId: string;
+  hotelNumber: string;
   type: string;
   capacity: number;
   pricePerNight: number;
   imageUrls: string[];
   description?: string;
   status: string; // "Booked" or "Available"
+  count: number;
   // createdAt: string;
   // updatedAt: string;
 }
 
-export const HotelRooms = () => {
+export const HotelRoomTypes = () => {
   const emptyRoom: Room = {
     _id: null,
     hotelId: "",
+    hotelNumber: "",
     type: "",
     capacity: 0,
     pricePerNight: 0,
     imageUrls: [],
     description: "",
     status: "Available",
+    count: 0,
   };
   const navigate = useNavigate();
   const { hotelId } = useParams();
-  const queryClient = useQueryClient();
   const [hotel, setHotel] = useState(null);
   const [error, setError] = useState<string | null>(null);
   const toast = useRef(null);
   const dt = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [rooms, setRooms] = useState<Room[]>([]);
+  const [roomTypes, setRoomTypes] = useState<Room[]>([]);
   const [room, setRoom] = useState(emptyRoom);
   // Delete room
-  const [deleteRoomDialog, setDeleteRoomDialog] = useState(false);
+  const [deleteRoomsDialog, setDeleteRoomsDialog] = useState(false);
+  const [roomTypeToDelete, setRoomTypeToDelete] = useState<string | null>(null);
   // Search
   const [globalFilter, setGlobalFilter] = useState<string>("");
 
@@ -86,11 +82,26 @@ export const HotelRooms = () => {
       const { data } = await axios.get("http://localhost:7000/api/rooms", {
         params: { hotelId },
       });
-      setRooms(data);
+
+      // Group rooms by type
+      const roomsByType: Room[] = data.reduce((acc, room: Room) => {
+        const { type } = room;
+        if (!acc[type]) {
+          acc[type] = { ...room, count: 1 }; // Initialize with count 1
+        } else {
+          acc[type].count += 1; // Increment count
+        }
+        return acc;
+      }, {});
+
+      // Convert the grouped object into an array to make it compatible with the DataTable.
+      const roomsGroupedByType = Object.values(roomsByType);
+
+      setRoomTypes(roomsGroupedByType);
       setIsLoading(false);
       return data;
     } catch (err: any) {
-      toast.current.show({
+      toast.current?.show({
         severity: "error",
         summary: "Error",
         detail: "Load room failed",
@@ -104,60 +115,12 @@ export const HotelRooms = () => {
     fetchRooms();
   }, [hotelId]);
 
-  // Mutation for deleting a room
-  const deleteRoomMutation = useMutation(deleteRoomById, {
-    onSuccess: () => {
-      // Invalidate and refetch rooms after deletion
-      queryClient.invalidateQueries("rooms");
-      toast.current?.show({
-        severity: "success",
-        summary: "Successful",
-        detail: "Room Deleted",
-        life: 3000,
-      });
-    },
-    onError: () => {
-      // Handle error
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to delete the room",
-        life: 3000,
-      });
-    },
-  });
-
-  const [statuses] = React.useState<string[]>(["Booked", "Available"]);
-
-  const getSeverity = (value: string) => {
-    switch (value) {
-      case "Available":
-        return "success";
-      case "Booked":
-        return "danger";
-      default:
-        return null;
-    }
-  };
-
-  const statusBodyTemplate = (roomData: Room) => {
-    return (
-      <Tag
-        value={roomData.status}
-        severity={getSeverity(roomData.status)}
-      ></Tag>
-    );
-  };
-
-  const priceBodyTemplate = (roomData: Room) => {
-    return new Intl.NumberFormat("vn-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(roomData.pricePerNight);
-  };
-
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        <ProgressSpinner />
+      </div>
+    );
   }
 
   if (error) {
@@ -189,7 +152,7 @@ export const HotelRooms = () => {
       label: "Rooms",
       template: () => (
         <>
-          <Link to={`http://localhost:5174/hotel/${hotel?._id}/rooms`}>
+          <Link to={`http://localhost:5174/hotel/${hotel?._id}/rooms/types`}>
             <a className="text-primary font-semibold text-blue-600">Rooms</a>
           </Link>
         </>
@@ -202,9 +165,6 @@ export const HotelRooms = () => {
   const openNew = () => {
     // hoặc dùng thẻ Link thay vì button và dùng event của hàm này
     navigate(`/hotel/${hotel?._id}/rooms/add`);
-  };
-  const exportCSV = () => {
-    dt.current.exportCSV();
   };
 
   const leftToolbarTemplate = () => {
@@ -221,91 +181,105 @@ export const HotelRooms = () => {
     );
   };
 
-  const rightToolbarTemplate = () => {
-    return (
-      <Button
-        label="Export"
-        icon="pi pi-upload"
-        className="p-button-help bg-purple-500 pr-3 pl-3 pt-2 pb-2 text-white hover:bg-purple-600"
-        onClick={exportCSV}
-        // onClick={() => exportCSV(false)}
-      />
-    );
-  };
-
   // Delete Room deleteRoomsDialogFooter
-  const hideDeleteRoomDialog = () => {
-    setDeleteRoomDialog(false);
-  };
-  const confirmDeleteRoom = (room) => {
-    console.log(room);
-    setRoom(room);
-    setDeleteRoomDialog(true);
+  const hideDeleteRoomsDialog = () => {
+    setDeleteRoomsDialog(false);
   };
 
-  const deleteRoom = () => {
-    deleteRoomMutation.mutate(room._id);
-    // Update the room list by removing the deleted room
-    setRooms((prevRooms) => prevRooms.filter((r) => r._id !== room._id));
-    setDeleteRoomDialog(false);
+  const confirmDeleteRoomsOfType = (type: string) => {
+    setRoomTypeToDelete(type);
+    setDeleteRoomsDialog(true);
   };
-  const deleteRoomDialogFooter = (
+
+  const deleteRoomsOfType = async () => {
+    try {
+      // Call backend API to delete rooms of a specific type
+      await axios.delete(
+        `http://localhost:7000/api/rooms/type/${roomTypeToDelete}`,
+        {
+          params: { hotelId },
+        }
+      );
+      // Update the rooms state
+      setRoomTypes((prevRooms) =>
+        prevRooms.filter((r) => r.type !== roomTypeToDelete)
+      );
+      setDeleteRoomsDialog(false);
+      toast.current?.show({
+        severity: "success",
+        summary: "Successful",
+        detail: "Rooms Deleted",
+        life: 3000,
+      });
+    } catch (err) {
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to delete rooms",
+        life: 3000,
+      });
+    }
+  };
+  const deleteRoomsDialogFooter = (
     <React.Fragment>
       <Button
         label="No"
         icon="pi pi-times"
         outlined
         className="pr-3 pl-3 pt-2 pb-2 text-purple-600 border border-purple-600 mr-2 hover:bg-gray-100"
-        onClick={hideDeleteRoomDialog}
+        onClick={() => setDeleteRoomsDialog(false)}
       />
       <Button
         label="Yes"
         icon="pi pi-check"
         severity="danger"
         className="bg-red-500 pr-3 pl-3 pt-2 pb-2 text-white hover:bg-red-600"
-        onClick={deleteRoom}
+        onClick={deleteRoomsOfType}
       />
     </React.Fragment>
   );
-  const editProduct = (room) => {
-    navigate(`/hotel/${hotel?._id}/rooms/edit/${room._id}`);
+  const viewRoomsOfType = (type: string) => {
+    navigate(`/hotel/${hotel?._id}/rooms/types/${type}`);
+  };
+  const editRoomsOfType = (type: string) => {
+    navigate(`/hotel/${hotel?._id}/rooms/type/${type}/edit`);
   };
 
-  const actionBodyTemplate = (roomData) => {
+  const actionBodyTemplate = (roomData: Room) => {
     return (
       <React.Fragment>
         <Button
-          icon="pi pi-pencil"
+          icon="pi pi-eye"
+          tooltip="View Rooms"
           rounded
           outlined
           className="mr-2 text-purple-600 border border-purple-600 hover:bg-purple-600 hover:text-white"
-          onClick={() => editProduct(roomData)}
+          onClick={() => viewRoomsOfType(roomData.type)}
         />
+        {/* <Button
+          icon="pi pi-pencil"
+          tooltip="Edit Rooms"
+          rounded
+          outlined
+          className="mr-2 text-purple-600 border border-purple-600 hover:bg-purple-600 hover:text-white"
+          onClick={() => editRoomsOfType(roomData.type)}
+        /> */}
         <Button
           icon="pi pi-trash"
+          tooltip="Delete Rooms"
           rounded
           outlined
           className="mr-2 text-red-600 border border-red-600 hover:bg-red-600 hover:text-white"
           severity="danger"
-          onClick={() => confirmDeleteRoom(roomData)}
+          onClick={() => confirmDeleteRoomsOfType(roomData.type)}
         />
-        {roomData.status === "Booked" && (
-          <Button
-            icon="pi pi-info-circle"
-            rounded
-            outlined
-            className="mr-2 text-blue-600 border border-blue-600 hover:bg-blue-600 hover:text-white"
-            severity="danger"
-            onClick={() => confirmDeleteRoom(roomData)}
-          />
-        )}
       </React.Fragment>
     );
   };
 
   const header = (
     <div className="flex flex-wrap gap-2 items-center justify-between">
-      <h4 className="m-0">Manage Rooms</h4>
+      <h4 className="m-0">Room Types</h4>
       <IconField
         className="w-1/3 p-4 flex items-center gap-9"
         iconPosition="left"
@@ -330,14 +304,10 @@ export const HotelRooms = () => {
       <div className="card p-fluid">
         <h1 className="text-3xl font-bold mb-3">Rooms</h1>
 
-        <Toolbar
-          className="mb-4"
-          start={leftToolbarTemplate}
-          end={rightToolbarTemplate}
-        ></Toolbar>
+        <Toolbar className="mb-4" start={leftToolbarTemplate}></Toolbar>
 
         <DataTable
-          value={rooms}
+          value={roomTypes}
           ref={dt}
           editMode="row"
           dataKey="id"
@@ -363,16 +333,8 @@ export const HotelRooms = () => {
             sortable
           ></Column>
           <Column
-            field="status"
-            header="Status"
-            body={statusBodyTemplate}
-            style={{ width: "20%" }}
-            sortable
-          ></Column>
-          <Column
-            field="pricePerNight"
-            header="Price per Night"
-            body={priceBodyTemplate}
+            field="count"
+            header="Number of Rooms"
             style={{ width: "20%" }}
             sortable
           ></Column>
@@ -386,30 +348,13 @@ export const HotelRooms = () => {
       </div>
 
       <Dialog
-        visible={deleteRoomDialog}
+        visible={deleteRoomsDialog}
         style={{ width: "32rem" }}
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
         header="Confirm"
         modal
-        footer={deleteRoomDialogFooter}
-        onHide={hideDeleteRoomDialog}
-      >
-        <div className="confirmation-content">
-          <i
-            className="pi pi-exclamation-triangle mr-3"
-            style={{ fontSize: "2rem" }}
-          />
-          {room && <span>Are you sure you want to delete this room?</span>}
-        </div>
-      </Dialog>
-      <Dialog
-        visible={deleteRoomDialog}
-        style={{ width: "32rem" }}
-        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Confirm"
-        modal
-        footer={deleteRoomDialogFooter}
-        onHide={hideDeleteRoomDialog}
+        footer={deleteRoomsDialogFooter}
+        onHide={hideDeleteRoomsDialog}
       >
         <div className="confirmation-content">
           <i

@@ -14,6 +14,7 @@ export type UserType = {
 // RoomType Schema
 export type RoomType = {
   _id: string;
+  roomNumber: string; // Số phòng, có thể là một chuỗi như "101", "202", v.v.
   hotelId: ObjectId;
   type: string; // Single, Double, Suite, etc.
   capacity: number; // Maximum capacity for people

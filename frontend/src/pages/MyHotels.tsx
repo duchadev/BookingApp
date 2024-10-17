@@ -106,7 +106,7 @@ const MyHotels = () => {
                   </div>
                   <span className="flex justify-end">
                     <Link
-                      to={`/hotel/${hotel._id}/rooms`}
+                      to={`/hotel/${hotel._id}/rooms/types`}
                       className="flex bg-green-600 text-white text-xl font-bold p-2 hover:bg-green-500 mr-3"
                     >
                       View Rooms

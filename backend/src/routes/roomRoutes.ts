@@ -78,6 +78,31 @@ roomRoutes.get("/", async (req: Request, res: Response) => {
   }
 });
 
+// READ all rooms of a specific type
+roomRoutes.get("/type/:roomType", async (req: Request, res: Response) => {
+  try {
+    const { roomType } = req.params; // Get room type from URL params
+    const { hotelId } = req.query; // Optional: Get hotelId from query params if provided
+
+    // Create a filter based on room type and optionally hotelId
+    const filter: { [key: string]: any } = { type: roomType };
+    if (hotelId) {
+      filter.hotelId = hotelId;
+    }
+
+    // Find rooms based on the filter
+    const rooms = await Room.find(filter);
+
+    if (!rooms || rooms.length === 0) {
+      return res.status(404).json({ message: "No rooms found for this type" });
+    }
+
+    res.json(rooms);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
 // READ a specific room by ID
 roomRoutes.get("/:roomId", async (req: Request, res: Response) => {
   try {
@@ -153,6 +178,34 @@ roomRoutes.delete(
         return res.status(404).json({ message: "Room not found" });
       }
       res.json({ message: "Room deleted" });
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error });
+    }
+  }
+);
+
+// DELETE all rooms of a specific type
+roomRoutes.delete(
+  "/type/:roomType",
+  verifyToken,
+  authorizeRoles("hotel_manager", "admin"),
+  async (req: Request, res: Response) => {
+    try {
+      const { hotelId } = req.query; // Nhận hotelId từ query params
+      const { roomType } = req.params; // Nhận roomType từ params
+
+      if (!hotelId) {
+        return res.status(400).json({ message: "Hotel ID is required" });
+      }
+
+      // Xóa tất cả các phòng có hotelId và roomType cụ thể
+      const deletedRooms = await Room.deleteMany({ hotelId, type: roomType });
+
+      if (deletedRooms.deletedCount === 0) {
+        return res.status(404).json({ message: "No rooms of this type found" });
+      }
+
+      res.json({ message: `${deletedRooms.deletedCount} rooms deleted` });
     } catch (error) {
       res.status(500).json({ message: "Server error", error });
     }

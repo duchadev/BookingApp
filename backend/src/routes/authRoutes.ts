@@ -37,7 +37,7 @@ authRoutes.post(
       }
 
       const token = jwt.sign(
-        { userId: user.id, role: user.role },
+        { userId: user.id, role: user.role, email: user.email },
         process.env.JWT_SECRET_KEY as string,
         {
           expiresIn: "1d",

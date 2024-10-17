@@ -8,6 +8,7 @@ import { MenuItem } from "primereact/menuitem";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { TieredMenu } from "primereact/tieredmenu";
 import MapComponent from "./MapComponent";
+import "../assets/css/demo.css";
 
 const Detail = () => {
   const { hotelId } = useParams();
@@ -233,9 +234,28 @@ const Detail = () => {
               thumbnail={thumbnailTemplate}
             />
           </div>
-          <div className="flex-1 flex flex-col space-x-4 ">
+          <div className="flex-1 flex flex-col space-x-4">
             <div className="flex-1">
-              <div>Feedback</div>
+              {/* <div>Feedback</div> */}
+              <div className="feedback-card ml-3">
+                <h2>How are you feeling this Hotel ?</h2>
+                <p>
+                  Your input is valuable in helping us better understand your
+                  needs and tailor our service accordingly.
+                </p>
+                <div className="emojis">
+                  <span className="emoji">😢</span>
+                  <span className="emoji">😞</span>
+                  <span className="emoji">😐</span>
+                  <span className="emoji">🙂</span>
+                  <span className="emoji">🥰</span>
+                </div>
+                <textarea
+                  className="comment-box"
+                  placeholder="Add a Comment..."
+                ></textarea>
+                <button className="submit-btn">Submit Now</button>
+              </div>
             </div>
             <div className="flex-1">
               <MapComponent

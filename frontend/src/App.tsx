@@ -22,9 +22,10 @@ import Home from "./pages/Home";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import MailList from "./components/MailList";
 import Layout from "./layouts/Layout";
-import { HotelRooms } from "./pages/rooms/HotelRooms";
+import { HotelRoomTypes } from "./pages/rooms/HotelRoomTypes";
 import AddRoom from "./pages/rooms/AddRoom";
 import EditRoom from "./pages/rooms/EditRoom";
+import { HotelRoomTypeDetails } from "./pages/rooms/HotelRoomTypeDetails";
 
 const App = () => {
   return (
@@ -116,11 +117,21 @@ const App = () => {
           }
         />
         <Route
-          path="/hotel/:hotelId/rooms"
+          path="/hotel/:hotelId/rooms/types"
           element={
             <ProtectedRoute roles={["hotel_manager", "admin"]}>
               <Layout>
-                <HotelRooms />
+                <HotelRoomTypes />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/hotel/:hotelId/rooms/types/:roomType"
+          element={
+            <ProtectedRoute roles={["hotel_manager", "admin"]}>
+              <Layout>
+                <HotelRoomTypeDetails />
               </Layout>
             </ProtectedRoute>
           }

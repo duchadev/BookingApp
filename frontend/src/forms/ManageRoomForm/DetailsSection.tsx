@@ -26,6 +26,20 @@ const DetailsSection = () => {
     <>
       <div className="flex flex-col gap-4">
         <label className="text-gray-700 text-sm font-bold max-w-[50%]">
+          Room Number
+          <input
+            type="text"
+            min={1}
+            className="border rounded w-full py-1 px-2 font-normal"
+            {...register("roomNumber", {
+              required: "This field is required",
+            })}
+          ></input>
+          {errors.roomNumber && (
+            <span className="text-red-500">{errors.roomNumber.message}</span>
+          )}
+        </label>
+        <label className="text-gray-700 text-sm font-bold max-w-[50%]">
           Type
           <select
             {...register("type", {

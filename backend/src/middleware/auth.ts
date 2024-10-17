@@ -6,6 +6,7 @@ declare global {
     interface Request {
       userId: string;
       role: string;
+      email: string;
     }
   }
 }
@@ -16,6 +17,7 @@ export const verifyToken = (
   next: NextFunction
 ) => {
   const token = req.cookies["auth_token"];
+  console.log("token: ", token);
 
   if (!token) {
     return res.status(401).json({ message: "unauthorized" });
@@ -26,7 +28,7 @@ export const verifyToken = (
     // req sẽ đc dùng trong phần route nếu có thể
     req.userId = (decoded as JwtPayload).userId;
     req.role = (decoded as JwtPayload).role;
-
+    req.email = (decoded as JwtPayload).email;
     next();
   } catch (error) {
     return res.status(401).json({ message: "unauthorized" });

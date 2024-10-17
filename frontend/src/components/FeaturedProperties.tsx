@@ -58,7 +58,7 @@ const FeaturedProperties: React.FC<FeaturedProps> = ({ hotels }) => {
           />
           <span className="fpName">{hotel?.name}</span>
           <span className="fpCity">{hotel?.city}</span>
-          <span className="fpPrice">Starting from ${minPrice}</span>
+          <span className="fpPrice">Starting from {minPrice} VND</span>
           <div className="fpRating">
             <button>8.9</button>
             <span>Excellent</span>
