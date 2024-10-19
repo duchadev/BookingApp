@@ -8,7 +8,10 @@ import { MenuItem } from "primereact/menuitem";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { TieredMenu } from "primereact/tieredmenu";
 import MapComponent from "./MapComponent";
-
+import FeedbackComponent from "../../src/components/FeedbackComponent";
+import { Button } from 'primereact/button';
+import FeedbackProperties from "../components/FeedbackProperties";
+import HotelFeedBackProperty from "../components/HotelFeedBackProperty";
 const Detail = () => {
   const { hotelId } = useParams();
   const [images, setImages] = useState([]); // Thay đổi giá trị khởi tạo thành mảng rỗng
@@ -28,7 +31,18 @@ const Detail = () => {
       enabled: !!hotelId,
     }
   );
-
+const { data: feedbacks, isLoading: feedbacksLoading, isError: feedbacksError } = useQuery(
+  "fetchFeedbacks",
+  () => apiClient.fetchFeedbacks()
+  );
+  const { data: feedbacksByHotel } = useQuery(
+  "fetchRoomsByHotelId",
+    () => apiClient.fetchRoomsByHotelId(hotelId || ""),
+    {
+      enabled: !!hotelId,
+    }
+);
+  // console.log(feedbacks);
   const { data: rooms } = useQuery(
     "fetchRoomsByHotelId",
     () => apiClient.fetchRoomsByHotelId(hotelId || ""),
@@ -204,7 +218,8 @@ const Detail = () => {
               <span>No map available</span>
             )}
           </div>
-          <div className="flex ">
+          <div className="flex flex-row items-center gap-6">
+ <div className="flex ">
             <TieredMenu model={items2} popup ref={menu} breakpoint="767px" />
             <a
               href=""
@@ -215,9 +230,16 @@ const Detail = () => {
             >
               <i className="pi pi-share-alt text-blue-600 font-bold text-2xl"></i>
             </a>
+             
+            
           </div>
+          <div className="card flex justify-content-center">
+            <FeedbackComponent />
         </div>
-
+          </div>
+         
+        </div>
+ 
         {/* Sử dụng flexbox để đưa Galleria và bản đồ vào cùng hàng */}
         <div className="flex space-x-4">
           <div className="flex-2">
@@ -234,8 +256,9 @@ const Detail = () => {
             />
           </div>
           <div className="flex-1 flex flex-col space-x-4 ">
-            <div className="flex-1">
+            <div className="flex-1 justify-center" >
               <div>Feedback</div>
+            <HotelFeedBackProperty hotelId={hotelId} />
             </div>
             <div className="flex-1">
               <MapComponent
@@ -264,6 +287,16 @@ const Detail = () => {
           <div className="h-fit">
             <GuestInfoForm pricePerNight={minPrice} hotelId={hotel?._id} />
           </div>
+        </div>
+
+<h1 className="text-2xl font-bold mt-9 pl-8 homeTitle">Feedback</h1>
+
+  <FeedbackProperties feedbacks={feedbacks} />
+
+<div className="card flex flex-wrap justify-content-center gap-3">
+           
+         
+          
         </div>
       </div>
     </>
