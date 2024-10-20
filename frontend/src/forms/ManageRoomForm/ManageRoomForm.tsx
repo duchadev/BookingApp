@@ -14,6 +14,8 @@ export type RoomFormData = {
   imageFiles: FileList;
   imageUrls: string[];
   description: string;
+  facilities: string[];
+  size: number;
 };
 
 type Props = {
@@ -44,6 +46,11 @@ const ManageRoomForm = ({ onSave, isLoading, room, hotelId }: Props) => {
     formData.append("capacity", formDataJson.capacity.toString());
     formData.append("description", formDataJson.description);
     formData.append("pricePerNight", formDataJson.pricePerNight.toString());
+    formData.append("size", formDataJson.size.toString());
+
+    formDataJson.facilities.forEach((facility, index) => {
+      formData.append(`facilities[${index}]`, facility);
+    });
 
     if (formDataJson.imageUrls) {
       formDataJson.imageUrls.forEach((url, index) => {

@@ -134,17 +134,43 @@ export const updateMyHotelById = async (hotelFormData: FormData) => {
 };
 
 export const addRoom = async (roomFormData: FormData) => {
-  const response = await fetch(`${API_BASE_URL}/api/rooms`, {
-    method: "POST",
-    credentials: "include",
-    body: roomFormData,
-  });
+  // const response = await fetch(`${API_BASE_URL}/api/rooms`, {
+  //   method: "POST",
+  //   credentials: "include",
+  //   body: roomFormData,
+  // });
 
-  if (!response.ok) {
-    throw new Error("Failed to add room");
+  // if (!response.ok) {
+  //   throw new Error("Failed to add room");
+  // }
+
+  // return response.json();
+
+  // --------
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/rooms`, {
+      method: "POST",
+      credentials: "include",
+      body: roomFormData,
+    });
+
+    // Kiểm tra nếu phản hồi không thành công
+    if (!response.ok) {
+      // Lấy thông tin lỗi từ phản hồi JSON
+      const errorData = await response.json();
+      throw new Error(
+        `Failed to add Room: ${response.status} - ${
+          errorData.message || errorData.error || "Unknown error"
+        }`
+      );
+    }
+
+    // Trả về phản hồi JSON nếu thành công
+    return response.json();
+  } catch (error: any) {
+    // Ném ra lỗi với thông tin cụ thể
+    throw new Error(error.message || "An unknown error occurred");
   }
-
-  return response.json();
 };
 
 export const fetchRoomsByHotelId = async (
@@ -174,20 +200,33 @@ export const fetchRoomById = async (roomId: string): Promise<RoomType> => {
 };
 
 export const updateRoomById = async (roomFormData: FormData) => {
-  const response = await fetch(
-    `${API_BASE_URL}/api/rooms/${roomFormData.get("roomId")}`,
-    {
-      method: "PUT",
-      body: roomFormData,
-      credentials: "include",
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/rooms/${roomFormData.get("roomId")}`,
+      {
+        method: "PUT",
+        body: roomFormData,
+        credentials: "include",
+      }
+    );
+
+    // Kiểm tra nếu phản hồi không thành công
+    if (!response.ok) {
+      // Lấy thông tin lỗi từ phản hồi JSON
+      const errorData = await response.json();
+      throw new Error(
+        `Failed to update Room: ${response.status} - ${
+          errorData.message || errorData.error || "Unknown error"
+        }`
+      );
     }
-  );
 
-  if (!response.ok) {
-    throw new Error("Failed to update Room");
+    // Trả về phản hồi JSON nếu thành công
+    return response.json();
+  } catch (error: any) {
+    // Ném ra lỗi với thông tin cụ thể
+    throw new Error(error.message || "An unknown error occurred");
   }
-
-  return response.json();
 };
 
 export const deleteRoomById = async (roomId: string) => {

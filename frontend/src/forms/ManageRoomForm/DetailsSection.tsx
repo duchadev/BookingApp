@@ -1,5 +1,7 @@
 import { useFormContext } from "react-hook-form";
 import { RoomFormData } from "./ManageRoomForm";
+import { useState, useEffect } from "react";
+import { roomFacilities } from "../../config/room-options-config";
 
 const DetailsSection = () => {
   const {
@@ -7,9 +9,11 @@ const DetailsSection = () => {
     formState: { errors },
     watch,
     setValue,
+    getValues,
   } = useFormContext<RoomFormData>();
 
   const existingImageUrls = watch("imageUrls");
+  const existingFacilities = watch("facilities") || []; // Nếu không có giá trị thì khởi tạo là một mảng rỗng
 
   const handleDelete = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -21,6 +25,31 @@ const DetailsSection = () => {
       existingImageUrls.filter((url) => url !== imageUrl)
     );
   };
+
+  const [customFacilities, setCustomFacilities] = useState<string[]>([]);
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [newFacility, setNewFacility] = useState("");
+
+  // Handle adding custom facility
+  const addCustomFacility = () => {
+    if (newFacility && !customFacilities.includes(newFacility)) {
+      setCustomFacilities((prev) => [...prev, newFacility]);
+      setValue("facilities", [...getValues("facilities"), newFacility]); // Update form state
+      setNewFacility("");
+      setShowCustomInput(false); // Hide input after adding
+    }
+  };
+
+  // Handle setting initial facilities when updating the room
+  useEffect(() => {
+    if (existingFacilities && existingFacilities.length > 0) {
+      setCustomFacilities(
+        existingFacilities.filter(
+          (facility: string) => !roomFacilities.includes(facility)
+        )
+      );
+    }
+  }, [existingFacilities]);
 
   return (
     <>
@@ -73,6 +102,20 @@ const DetailsSection = () => {
           )}
         </label>
         <label className="text-gray-700 text-sm font-bold max-w-[50%]">
+          Room Size
+          <input
+            type="number"
+            min={1}
+            className="border rounded w-full py-1 px-2 font-normal"
+            {...register("size", {
+              required: "This field is required",
+            })}
+          ></input>
+          {errors.size && (
+            <span className="text-red-500">{errors.size.message}</span>
+          )}
+        </label>
+        <label className="text-gray-700 text-sm font-bold max-w-[50%]">
           Price Per Night
           <input
             type="number"
@@ -100,7 +143,97 @@ const DetailsSection = () => {
           )}
         </label>
       </div>
-      <h2 className="text-2xl font-bold mb-3">Images</h2>
+
+      <div>
+        <h2 className="text-2xl font-bold mb-3">Facilities</h2>
+        <div className="grid grid-cols-5 gap-3">
+          {/* Map over predefined facilities */}
+          {roomFacilities.map((facility) => (
+            <label key={facility} className="text-sm flex gap-1 text-gray-700">
+              <input
+                type="checkbox"
+                value={facility}
+                {...register("facilities", {
+                  validate: (facilities) => {
+                    if (facilities && facilities.length > 0) {
+                      return true;
+                    } else {
+                      return "At least one facility is required";
+                    }
+                  },
+                })}
+                checked={existingFacilities.includes(facility)} // Thay vì defaultChecked, dùng checked để cập nhật dựa trên existingFacilities
+                onChange={(e) => {
+                  const updatedFacilities = e.target.checked
+                    ? [...existingFacilities, facility]
+                    : existingFacilities.filter((item) => item !== facility);
+                  setValue("facilities", updatedFacilities);
+                }}
+              />
+              {facility}
+            </label>
+          ))}
+
+          {/* Map over custom facilities */}
+          {customFacilities.map((facility) => (
+            <label key={facility} className="text-sm flex gap-1 text-gray-700">
+              <input
+                type="checkbox"
+                value={facility}
+                {...register("facilities")}
+                checked={existingFacilities.includes(facility)} // Kiểm tra trong existingFacilities để hiển thị đúng các custom facilities
+                onChange={(e) => {
+                  const updatedFacilities = e.target.checked
+                    ? [...existingFacilities, facility]
+                    : existingFacilities.filter((item) => item !== facility);
+                  setValue("facilities", updatedFacilities);
+                }}
+              />
+              {facility}
+            </label>
+          ))}
+
+          {/* Button to show input for adding more facilities */}
+          {!showCustomInput && (
+            <button
+              type="button"
+              className="text-blue-500 text-sm"
+              onClick={() => setShowCustomInput(true)}
+            >
+              More...
+            </button>
+          )}
+        </div>
+
+        {/* Input for custom facility */}
+        {showCustomInput && (
+          <div className="flex gap-2 mt-2">
+            <input
+              type="text"
+              value={newFacility}
+              onChange={(e) => setNewFacility(e.target.value)}
+              placeholder="Add custom facility"
+              className="border px-2 py-1 rounded"
+            />
+            <button
+              type="button"
+              onClick={addCustomFacility}
+              className="bg-blue-500 text-white px-3 py-1 rounded"
+            >
+              Add
+            </button>
+          </div>
+        )}
+
+        {/* Validation error */}
+        {errors.facilities && (
+          <span className="text-red-500 text-sm font-bold">
+            {errors.facilities.message}
+          </span>
+        )}
+      </div>
+
+      <h2 className="text-2xl font-bold">Images</h2>
       <div className="border rounded p-4 flex flex-col gap-4">
         {existingImageUrls && (
           <div className="grid grid-cols-6 gap-4">

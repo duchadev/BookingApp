@@ -1,7 +1,6 @@
 import express, { Request, Response } from "express";
 import multer from "multer";
 import { check, validationResult } from "express-validator";
-import User from "../models/User";
 import { authorizeRoles, verifyToken } from "../middleware/auth";
 import Room from "../models/Room";
 import { RoomType } from "../shared/types";
@@ -39,6 +38,16 @@ roomRoutes.post(
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { hotelId, roomNumber } = req.body;
+
+      // Check if a room with the same roomNumber exists in the same hotel
+      const existingRoom = await Room.findOne({ hotelId, roomNumber });
+      if (existingRoom) {
+        return res
+          .status(400)
+          .json({ message: "Room number already exists in this hotel" });
       }
 
       const imageFiles = req.files as Express.Multer.File[];
@@ -151,6 +160,27 @@ roomRoutes.put(
     }
 
     try {
+      const { roomNumber } = req.body;
+
+      // Check if the room exists
+      const existingRoom = await Room.findById(req.params.roomId);
+      if (!existingRoom) {
+        return res.status(404).json({ message: "Room not found" });
+      }
+
+      // If roomNumber is being updated, check if the new roomNumber already exists
+      if (roomNumber && roomNumber !== existingRoom.roomNumber) {
+        const roomWithSameNumber = await Room.findOne({ roomNumber });
+
+        if (roomWithSameNumber) {
+          return res.status(400).json({
+            message:
+              "Room number already exists. Please choose a different one.",
+          });
+        }
+      }
+
+      // Model.findByIdAndUpdate(id, update, options)
       const updatedRoom = await Room.findByIdAndUpdate(
         req.params.roomId,
         req.body,
@@ -161,6 +191,7 @@ roomRoutes.put(
       }
       res.json(updatedRoom);
     } catch (error) {
+      console.log(error);
       res.status(500).json({ message: "Server error", error });
     }
   }

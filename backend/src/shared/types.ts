@@ -21,6 +21,8 @@ export type RoomType = {
   pricePerNight: number;
   imageUrls: string[];
   description?: string; // Optional description for each room type
+  size: number;
+  facilities: string[];
   status: "Booked" | "Available";
 };
 

@@ -346,8 +346,8 @@ export const HotelRoomTypeDetails = () => {
           header={header}
         >
           <Column
-            field="_id"
-            header="id"
+            field="roomNumber"
+            header="Room Number"
             style={{ width: "20%" }}
             sortable
           ></Column>

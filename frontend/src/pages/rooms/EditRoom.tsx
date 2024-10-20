@@ -44,8 +44,9 @@ const EditRoom = () => {
     onSuccess: () => {
       showToast({ message: "Room Saved!", type: "SUCCESS" });
     },
-    onError: () => {
-      showToast({ message: "Error Edit Room", type: "ERROR" });
+    onError: (error: unknown) => {
+      // showToast({ message: "Error Edit Room", type: "ERROR" });
+      showToast({ message: error.message, type: "ERROR" });
     },
   });
 
@@ -68,8 +69,8 @@ const EditRoom = () => {
       label: hotel?.name,
       template: () => (
         <>
-          <Link to="http://localhost:5174/my-hotels" className="text-primary">
-            {hotel?.name}
+          <Link to={`http://localhost:5174/detail/${hotel?._id}`}>
+            <a className="text-primary">{hotel?.name}</a>
           </Link>
         </>
       ),
@@ -78,12 +79,20 @@ const EditRoom = () => {
       label: "Rooms",
       template: () => (
         <>
-          <Link to={`http://localhost:5174/hotel/${hotel?._id}/rooms`}>
+          <Link to={`http://localhost:5174/hotel/${hotel?._id}/rooms/types`}>
             <a className="text-primary">Rooms</a>
           </Link>
         </>
       ),
     },
+    // {
+    //   label: { roomType },
+    //   template: () => (
+    //     <>
+    //       <a className="text-primary font-semibold text-blue-600">{roomType}</a>
+    //     </>
+    //   ),
+    // },
     {
       label: "Edit",
       template: () => (
