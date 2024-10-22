@@ -10,6 +10,10 @@ import { TieredMenu } from "primereact/tieredmenu";
 import MapComponent from "./MapComponent";
 import "../assets/css/demo.css";
 import BookingTable from "../components/BookingTable";
+import FeedbackComponent from "../../src/components/FeedbackComponent";
+import { Button } from 'primereact/button';
+import FeedbackProperties from "../components/FeedbackProperties";
+import HotelFeedBackProperty from "../components/HotelFeedBackProperty";
 
 const Detail = () => {
   const { hotelId } = useParams();
@@ -30,7 +34,17 @@ const Detail = () => {
       enabled: !!hotelId,
     }
   );
-
+const { data: feedbacks, isLoading: feedbacksLoading, isError: feedbacksError } = useQuery(
+  "fetchFeedbacks",
+  () => apiClient.fetchFeedbacks()
+  );
+  const { data: feedbacksByHotel } = useQuery(
+  "fetchRoomsByHotelId",
+    () => apiClient.fetchRoomsByHotelId(hotelId || ""),
+    {
+      enabled: !!hotelId,
+    }
+);
   const { data: rooms } = useQuery(
     "fetchRoomsByHotelId",
     () => apiClient.fetchRoomsByHotelId(hotelId || ""),
@@ -174,22 +188,26 @@ const Detail = () => {
 
         <div className="flex space-x-4">
           <div className="flex-1 ">
-            <span className="flex">
-              {Array.from({ length: 5 }).map((_, index) => {
-                if (index < hotel.starRating) {
-                  return (
-                    <i
-                      key={index}
-                      className="pi pi-star-fill text-yellow-400"
-                    ></i>
-                    // <i key={index} className="pi pi-star-half-fill text-yellow-300"></i>
-                  );
-                }
-                return (
-                  <i key={index} className="pi pi-star-fill text-gray-300"></i>
-                );
-              })}
-            </span>
+            <span className="flex items-center space-x-1">
+  {Array.from({ length: 5 }).map((_, index) => {
+    if (index < hotel.starRating) {
+      return (
+        <i
+          key={index}
+          className="pi pi-star-fill text-yellow-400"
+        ></i>
+      );
+    }
+
+    return (
+      <i key={index} className="pi pi-star-fill text-gray-300"></i>
+    );
+  })}
+  <strong className="ml-2 text-yellow-600 font-bold text-lg flex items-center">
+    <i className="pi pi-crown mr-1 text-yellow-600"></i>
+    {hotel?.starRating}/5
+  </strong>
+</span>
             <h1 className="text-3xl font-bold">{hotel?.name}</h1>
             <i className="pi pi-map-marker" style={{ color: "blue" }}></i>{" "}
             {hotel?.address}, {hotel?.city}, {hotel?.country} -{" "}
@@ -206,7 +224,8 @@ const Detail = () => {
               <span>No map available</span>
             )}
           </div>
-          <div className="flex ">
+           <div className="flex flex-row items-center gap-6">
+ <div className="flex ">
             <TieredMenu model={items2} popup ref={menu} breakpoint="767px" />
             <a
               href=""
@@ -217,7 +236,14 @@ const Detail = () => {
             >
               <i className="pi pi-share-alt text-blue-600 font-bold text-2xl"></i>
             </a>
+             
+            
           </div>
+          <div className="flex justify-content-center">
+            <FeedbackComponent />
+        </div>
+          </div>
+         
         </div>
 
         {/* Sử dụng flexbox để đưa Galleria và bản đồ vào cùng hàng */}
@@ -236,27 +262,11 @@ const Detail = () => {
             />
           </div>
           <div className="flex-1 flex flex-col space-x-4">
-            <div className="flex-1">
-              {/* <div>Feedback</div> */}
-              <div className="feedback-card ml-3">
-                <h2>How are you feeling this Hotel ?</h2>
-                <p>
-                  Your input is valuable in helping us better understand your
-                  needs and tailor our service accordingly.
-                </p>
-                <div className="emojis">
-                  <span className="emoji">😢</span>
-                  <span className="emoji">😞</span>
-                  <span className="emoji">😐</span>
-                  <span className="emoji">🙂</span>
-                  <span className="emoji">🥰</span>
-                </div>
-                <textarea
-                  className="comment-box"
-                  placeholder="Add a Comment..."
-                ></textarea>
-                <button className="submit-btn">Submit Now</button>
-              </div>
+         
+              <div className="flex-1 justify-center" >
+            
+            <HotelFeedBackProperty hotelId={hotelId} />
+            
             </div>
             <div className="flex-1">
               <MapComponent
@@ -287,7 +297,11 @@ const Detail = () => {
           </div>
         </div>
 
+
         <BookingTable />
+        <h1 className="text-2xl font-bold mt-9 pl-8 homeTitle">Feedback</h1>
+
+  <FeedbackProperties hotelId={hotelId} />
       </div>
     </>
   );

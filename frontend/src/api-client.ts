@@ -357,3 +357,47 @@ export const fetchMyBookings = async (): Promise<HotelType[]> => {
 
   return response.json();
 };
+export const fetchFeedbacks = async () => {
+  const response = await fetch(`${API_BASE_URL}/api/feedback/feedback`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch feedback");
+  }
+  console.log(response);
+  return response.json();
+};
+// api-client.js
+export const submitFeedback = async (feedbackData: any) => {
+  const response = await fetch(`${API_BASE_URL}/api/feedback/create`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(feedbackData),
+  });
+
+  if (!response.ok) {
+    throw new Error("Error submitting feedback");
+  }
+
+  return response.json(); // Return the response data
+};
+
+export const fetchFeedbackByHotel = async (hotelId: string) => {
+  const response = await fetch(`${API_BASE_URL}/api/feedback/get/${hotelId}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch feedback");
+  }
+  console.log(response);
+  return response.json();
+};
+export const fetchTop5Feedback = async (hotelId: string) => {
+  const response = await fetch(
+    `${API_BASE_URL}/api/feedback/top-feedback/${hotelId}`
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch feedback");
+  }
+  console.log(response);
+  return response.json();
+};
