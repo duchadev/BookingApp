@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 
 type SearchContext = {
+  pricePerNight: number;
   destination: string;
   checkIn: Date;
   checkOut: Date;
@@ -8,6 +9,7 @@ type SearchContext = {
   childCount: number;
   hotelId: string;
   saveSearchValues: (
+    pricePerNight: number,
     destination: string,
     checkIn: Date,
     checkOut: Date,
@@ -25,6 +27,9 @@ type SearchContextProviderProps = {
 export const SearchContextProvider = ({
   children,
 }: SearchContextProviderProps) => {
+  const [pricePerNight, setPricePerNight] = useState<number>(() =>
+    parseInt(sessionStorage.getItem("pricePerNight") || "0")
+  );
   const [destination, setDestination] = useState<string>(
     () => sessionStorage.getItem("destination") || ""
   );
@@ -47,6 +52,7 @@ export const SearchContextProvider = ({
   );
 
   const saveSearchValues = (
+    pricePerNight: number,
     destination: string,
     checkIn: Date,
     checkOut: Date,
@@ -54,6 +60,7 @@ export const SearchContextProvider = ({
     childCount: number,
     hotelId?: string
   ) => {
+    setPricePerNight(pricePerNight);
     setDestination(destination);
     setCheckIn(checkIn);
     setCheckOut(checkOut);
@@ -63,6 +70,7 @@ export const SearchContextProvider = ({
       setHotelId(hotelId);
     }
 
+    sessionStorage.setItem("pricePerNight", pricePerNight.toString());
     sessionStorage.setItem("destination", destination);
     sessionStorage.setItem("checkIn", checkIn.toISOString());
     sessionStorage.setItem("checkOut", checkOut.toISOString());
@@ -77,6 +85,7 @@ export const SearchContextProvider = ({
   return (
     <SearchContext.Provider
       value={{
+        pricePerNight,
         destination,
         checkIn,
         checkOut,

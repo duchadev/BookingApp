@@ -1,0 +1,19 @@
+.custom-button {
+  background-color: #00bcd4; /* Màu xanh da trời */
+  color: white; /* Màu chữ trắng */
+  border: none; /* Xóa viền */
+  border-radius: 8px; /* Bo tròn góc */
+  padding: 10px 20px; /* Tăng kích thước padding */
+  font-size: 16px; /* Kích thước chữ lớn hơn */
+  font-weight: bold; /* Chữ đậm */
+  cursor: pointer; /* Hiệu ứng con trỏ */
+  transition: background-color 0.3s ease; /* Hiệu ứng chuyển màu khi hover */
+}
+
+.custom-button:hover {
+  background-color: #00a3b3; /* Màu tối hơn khi hover */
+}
+
+.bg-blue-custom {
+  background-color: #007bff; /* Màu xanh biển đậm */
+}

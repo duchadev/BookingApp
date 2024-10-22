@@ -301,7 +301,7 @@ export const HotelRoomTypes = () => {
     <>
       <Toast ref={toast} />
       <BreadCrumb model={items} home={home} className="mb-3" />
-      <div className="card p-fluid">
+      <div className=" p-fluid">
         <h1 className="text-3xl font-bold mb-3">Rooms</h1>
 
         <Toolbar className="mb-4" start={leftToolbarTemplate}></Toolbar>

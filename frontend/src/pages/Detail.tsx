@@ -9,6 +9,7 @@ import { BreadCrumb } from "primereact/breadcrumb";
 import { TieredMenu } from "primereact/tieredmenu";
 import MapComponent from "./MapComponent";
 import "../assets/css/demo.css";
+import BookingTable from "../components/BookingTable";
 
 const Detail = () => {
   const { hotelId } = useParams();
@@ -285,6 +286,8 @@ const Detail = () => {
             <GuestInfoForm pricePerNight={minPrice} hotelId={hotel?._id} />
           </div>
         </div>
+
+        <BookingTable />
       </div>
     </>
   );

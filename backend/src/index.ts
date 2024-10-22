@@ -10,6 +10,7 @@ import { v2 as cloudinary } from "cloudinary";
 import hotelRoutes from "./routes/hotelRoutes";
 import bookingRoutes from "./routes/myBookingRoutes";
 import roomRoutes from "./routes/roomRoutes";
+import sendEmailRoutes from "./routes/sendEmailRoutes";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -37,6 +38,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/hotels", hotelRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/booking", roomRoutes);
+app.use("/api", sendEmailRoutes);
 // app.use("/api/admin", adminRouter);
 
 app.listen(7000, () => {

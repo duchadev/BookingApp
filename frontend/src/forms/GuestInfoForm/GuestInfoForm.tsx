@@ -1,9 +1,9 @@
+import React, { useRef, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import DatePicker from "react-datepicker";
 import { useSearchContext } from "../../contexts/SearchContext";
 import { useAppContext } from "../../contexts/AppContext";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Sidebar } from "primereact/sidebar";
 import { DataTable } from "primereact/datatable";
@@ -13,20 +13,21 @@ import { InputIcon } from "primereact/inputicon";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import axios from "axios";
+import { Toast } from "primereact/toast";
 
 type Props = {
   hotelId?: string;
-  pricePerNight?: number;
+  pricePerNight: number;
 };
 
 type GuestInfoFormData = {
+  pricePerNight: number;
   checkIn: Date;
   checkOut: Date;
   adultCount: number;
   childCount: number;
 };
 
-// Define Room interface
 interface Room {
   _id: string | null;
   hotelId: string;
@@ -35,9 +36,7 @@ interface Room {
   pricePerNight: number;
   imageUrls: string[];
   description?: string;
-  status: string; // "Booked" or "Available"
-  // createdAt: string;
-  // updatedAt: string;
+  status: string;
 }
 
 const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
@@ -53,13 +52,14 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
     null
   );
 
+  const toast = useRef<Toast>(null); // Reference for Toast component
+
   // Fetch rooms from backend
   const fetchRooms = async () => {
     try {
       const { data } = await axios.get("http://localhost:7000/api/rooms", {
         params: { hotelId },
       });
-      // Filter rooms that are only "Available"
       const availableRooms = data.filter(
         (room: Room) => room.status === "Available"
       );
@@ -98,6 +98,7 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
 
   const onSignInClick = (data: GuestInfoFormData) => {
     search.saveSearchValues(
+      pricePerNight,
       "",
       data.checkIn,
       data.checkOut,
@@ -108,15 +109,26 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
   };
 
   const onSubmit = (data: GuestInfoFormData) => {
-    search.saveSearchValues(
-      "",
-      data.checkIn,
-      data.checkOut,
-      data.adultCount,
-      data.childCount
-    );
-    console.log(data);
-    navigate(`/hotel/${hotelId}/booking`);
+    navigate(`/hotel/${hotelId}/booking`, {
+      state: {
+        pricePerNight,
+        checkIn: data.checkIn,
+        checkOut: data.checkOut,
+        adultCount: data.adultCount,
+        childCount: data.childCount,
+      },
+    });
+  };
+
+  const pickRoom = (roomData: Room) => {
+    console.log(roomData);
+    setSelectedRoomPrice(roomData.pricePerNight);
+    toast.current?.show({
+      severity: "success",
+      summary: "Room Selected",
+      detail: `You have selected a room at VND ${roomData.pricePerNight}.`,
+      life: 3000,
+    });
   };
 
   const header = (
@@ -138,6 +150,7 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
       </IconField>
     </div>
   );
+
   const getSeverity = (value: string) => {
     switch (value) {
       case "Available":
@@ -148,6 +161,7 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
         return null;
     }
   };
+
   const statusBodyTemplate = (roomData: Room) => {
     return (
       <Tag
@@ -156,16 +170,14 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
       ></Tag>
     );
   };
+
   const priceBodyTemplate = (roomData: Room) => {
     return new Intl.NumberFormat("vn-VN", {
       style: "currency",
       currency: "VND",
     }).format(roomData.pricePerNight);
   };
-  const pickRoom = (roomData: Room) => {
-    console.log(roomData);
-    setSelectedRoomPrice(roomData.pricePerNight);
-  };
+
   const actionBodyTemplate = (roomData: Room) => {
     return (
       <>
@@ -174,15 +186,13 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
           rounded
           outlined
           className="mr-2 text-blue-600 border border-blue-600 hover:bg-blue-600 hover:text-white"
-          severity="info"
-          // onClick={() => confirmDeleteRoom(roomData)}
         />
         <Button
           icon="pi pi-plus"
           rounded
           outlined
           className="mr-2 text-green-600 border border-green-600 hover:bg-green-600 hover:text-white"
-          onClick={() => pickRoom(roomData)}
+          onClick={() => pickRoom(roomData)} // Call pickRoom function when clicked
         />
       </>
     );
@@ -190,6 +200,9 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
 
   return (
     <>
+      {/* Toast component to show notifications */}
+      <Toast ref={toast} />
+
       <div className="flex flex-col p-4 bg-blue-200 gap-4">
         <h3 className="text-md font-bold">
           {selectedRoomPrice ? `VND ${selectedRoomPrice}` : "VND"}
@@ -200,13 +213,6 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
           icon="pi pi-arrow-left"
           onClick={() => setVisibleRight(true)}
         />
-        {/* <Button
-        label="Yes"
-        icon="pi pi-check"
-        severity="danger"
-        className="bg-red-500 pr-3 pl-3 pt-2 pb-2 text-white hover:bg-red-600"
-        onClick={deleteRoom}
-      /> */}
         <form
           onSubmit={
             isLoggedIn ? handleSubmit(onSubmit) : handleSubmit(onSignInClick)
@@ -233,12 +239,12 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
                 required
                 selected={checkOut}
                 onChange={(date) => setValue("checkOut", date as Date)}
-                selectsStart
+                selectsEnd
                 startDate={checkIn}
                 endDate={checkOut}
                 minDate={minDate}
                 maxDate={maxDate}
-                placeholderText="Check-in Date"
+                placeholderText="Check-out Date"
                 className="min-w-full bg-white p-2 focus:outline-none"
                 wrapperClassName="min-w-full"
               />
@@ -268,9 +274,7 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
                   type="number"
                   min={0}
                   max={20}
-                  {...register("childCount", {
-                    valueAsNumber: true,
-                  })}
+                  {...register("childCount", { valueAsNumber: true })}
                 />
               </label>
               {errors.adultCount && (
@@ -283,7 +287,6 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
               <Button
                 type="submit"
                 label="Book Now!"
-                // Adjust button state based on selectedRoomPrice
                 className={`p-4 text-white font-bold ${
                   selectedRoomPrice
                     ? "bg-green-600 hover:bg-green-800"
@@ -301,6 +304,7 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
           </div>
         </form>
       </div>
+
       <Sidebar
         visible={visibleRight}
         position="right"
@@ -311,52 +315,28 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
         <DataTable
           value={rooms}
           ref={dt}
-          editMode="row"
-          dataKey="id"
           paginator
           rows={5}
           rowsPerPageOptions={[5, 10, 25, 50]}
           showGridlines
-          removableSort
-          // search
           globalFilter={globalFilter}
           header={header}
         >
-          <Column
-            selectionMode="single"
-            headerStyle={{ width: "3rem" }}
-          ></Column>
-          <Column
-            field="type"
-            header="Type"
-            style={{ width: "20%" }}
-            sortable
-          ></Column>
-          <Column
-            field="capacity"
-            header="Capacity"
-            style={{ width: "20%" }}
-            sortable
-          ></Column>
+          <Column field="type" header="Type" sortable></Column>
+          <Column field="capacity" header="Capacity" sortable></Column>
           <Column
             field="status"
             header="Status"
             body={statusBodyTemplate}
-            style={{ width: "20%" }}
             sortable
           ></Column>
           <Column
             field="pricePerNight"
             header="Price per Night"
             body={priceBodyTemplate}
-            style={{ width: "20%" }}
             sortable
           ></Column>
-          <Column
-            body={actionBodyTemplate}
-            exportable={false}
-            style={{ minWidth: "12rem" }}
-          ></Column>
+          <Column body={actionBodyTemplate}></Column>
         </DataTable>
       </Sidebar>
     </>
