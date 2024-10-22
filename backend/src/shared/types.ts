@@ -71,3 +71,19 @@ export type PaymentIntentResponse = {
   clientSecret: string;
   totalCost: number;
 };
+export type FeedbackType = {
+  _id: string; // The unique ID of the feedback
+  userId: {
+    _id: ObjectId;
+    firstName: string;
+    lastName: string;
+  }; // Populated user information
+  hotelId: {
+    _id: ObjectId;
+    name: string;
+  }; // Populated hotel information
+  rating: number; // Rating between 1 and 5
+  comment: string; // User's comment
+  createdAt: Date; // Auto-generated timestamp
+  updatedAt: Date; // Auto-generated timestamp
+};
