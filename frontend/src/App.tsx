@@ -61,17 +61,13 @@ const App = () => {
         <Route
           path="/register"
           element={
-            <Layout>
               <Register />
-            </Layout>
           }
         />
         <Route
           path="/sign-in"
           element={
-            <Layout>
               <SignIn />
-            </Layout>
           }
         />
 
