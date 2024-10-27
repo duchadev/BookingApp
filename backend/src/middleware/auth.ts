@@ -7,6 +7,7 @@ declare global {
       userId: string;
       role: string;
       email: string;
+      firstName: string;
     }
   }
 }
@@ -28,6 +29,8 @@ export const verifyToken = (
     req.userId = (decoded as JwtPayload).userId;
     req.role = (decoded as JwtPayload).role;
     req.email = (decoded as JwtPayload).email;
+    req.firstName = (decoded as JwtPayload).firstName;
+
     next();
   } catch (error) {
     return res.status(401).json({ message: "unauthorized" });

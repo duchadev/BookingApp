@@ -36,7 +36,7 @@ const AddRoom = () => {
     onSuccess: () => {
       showToast({ message: "Room Saved!", type: "SUCCESS" });
     },
-    onError: () => {
+    onError: (error: unknown) => {
       // showToast({ message: "Error Saving Room", type: "ERROR" });
       showToast({ message: error.message, type: "ERROR" });
     },

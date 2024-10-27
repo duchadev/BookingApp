@@ -8,12 +8,14 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    phone: { type: String, required: true },
+    phone: { type: String, required: true, unique: true },
     role: {
       type: String,
-      enum: ["User", "Admin", "Hotel_manager"],
-      default: "User",
+      enum: ["user", "admin", "hotel_manager"],
+      default: "user",
     },
+    verificationToken: { type: String },
+    isVerified: { type: Boolean, default: false },
     status: {
       type: String,
       enum: ["Active", "Inactive", "Banned"],

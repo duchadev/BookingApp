@@ -13,6 +13,7 @@ import { Dialog } from "primereact/dialog";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
 import { ProgressSpinner } from "primereact/progressspinner";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 // Define Room interface
 interface Room {
@@ -198,8 +199,10 @@ export const HotelRoomTypes = () => {
         `http://localhost:7000/api/rooms/type/${roomTypeToDelete}`,
         {
           params: { hotelId },
+          withCredentials: true, // Include credentials (cookies or tokens), giống credentials: "include" bên fetch API thông thường
         }
       );
+
       // Update the rooms state
       setRoomTypes((prevRooms) =>
         prevRooms.filter((r) => r.type !== roomTypeToDelete)
@@ -241,9 +244,6 @@ export const HotelRoomTypes = () => {
   const viewRoomsOfType = (type: string) => {
     navigate(`/hotel/${hotel?._id}/rooms/types/${type}`);
   };
-  const editRoomsOfType = (type: string) => {
-    navigate(`/hotel/${hotel?._id}/rooms/type/${type}/edit`);
-  };
 
   const actionBodyTemplate = (roomData: Room) => {
     return (
@@ -256,14 +256,6 @@ export const HotelRoomTypes = () => {
           className="mr-2 text-purple-600 border border-purple-600 hover:bg-purple-600 hover:text-white"
           onClick={() => viewRoomsOfType(roomData.type)}
         />
-        {/* <Button
-          icon="pi pi-pencil"
-          tooltip="Edit Rooms"
-          rounded
-          outlined
-          className="mr-2 text-purple-600 border border-purple-600 hover:bg-purple-600 hover:text-white"
-          onClick={() => editRoomsOfType(roomData.type)}
-        /> */}
         <Button
           icon="pi pi-trash"
           tooltip="Delete Rooms"

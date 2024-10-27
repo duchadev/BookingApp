@@ -26,14 +26,14 @@ const Register = () => {
   } = useForm<RegisterFormData>();
 
   const mutation = useMutation(apiClient.register, {
-    onSuccess: async () => {
-      showToast({ message: "Registration Success!", type: "SUCCESS" });
-      await queryClient.invalidateQueries("validateToken");
-      navigate("/");
+    onSuccess: async (res) => {
+      showToast({ message: res?.message, type: "SUCCESS" });
+      // await queryClient.invalidateQueries("validateToken"); => Ko validate token sau khi register nữa, chỉ có /login
+      // navigate("/login");
     },
-    onError: (error: Error) => {
-      console.log("error: ", error);
-      showToast({ message: error.message, type: "ERROR" });
+    onError: (error) => {
+      const errorMessage = error.message ? error.message : error.errorData;
+      showToast({ message: errorMessage, type: "ERROR" });
     },
   });
 

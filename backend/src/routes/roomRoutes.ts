@@ -43,7 +43,8 @@ roomRoutes.post(
       const { hotelId, roomNumber } = req.body;
 
       // Check if a room with the same roomNumber exists in the same hotel
-      const existingRoom = await Room.findOne({ hotelId, roomNumber });
+      // const existingRoom = await Room.findOne({ hotelId, roomNumber });
+      const existingRoom = await Room.findOne({ roomNumber });
       if (existingRoom) {
         return res
           .status(400)
@@ -66,6 +67,7 @@ roomRoutes.post(
 
       res.status(201).json(savedRoom);
     } catch (error) {
+      console.error(error);
       res.status(500).json({ message: "Server error", error: error.message });
     }
   }

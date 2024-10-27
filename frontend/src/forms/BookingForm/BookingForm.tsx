@@ -14,6 +14,7 @@ export type BookingFormData = {
   firstName: string;
   lastName: string;
   email: string;
+  phone: string;
   adultCount: number;
   childCount: number;
   checkIn: string;
@@ -48,6 +49,7 @@ const BookingForm = ({ currentUser }: Props) => {
       firstName: currentUser.firstName,
       lastName: currentUser.lastName,
       email: currentUser.email,
+      phone: currentUser.phone,
       adultCount: search.adultCount,
       childCount: search.childCount,
       checkIn: search.checkIn.toISOString(),
@@ -98,6 +100,16 @@ const BookingForm = ({ currentUser }: Props) => {
             readOnly
             disabled
             {...register("email")}
+          />
+        </label>
+        <label className="text-gray-700 text-sm font-bold flex-1">
+          Phone Number
+          <input
+            className="mt-1 border rounded w-full py-2 px-3 text-gray-700 bg-gray-200 font-normal"
+            type="text"
+            readOnly
+            disabled
+            {...register("phone")}
           />
         </label>
       </div>

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import SignOutButton from "./SignOutButton";
+import Fchat from "./Fchat";
 
 const Header = () => {
   const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -8,6 +9,7 @@ const Header = () => {
 
   return (
     <div className="bg-blue-800 py-6">
+      <Fchat />
       <div className="container mx-auto flex justify-between">
         <span className="text-5xl text-white font-bold tracking-tight">
           <Link to="/">HotelHaven</Link>

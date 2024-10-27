@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Table, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button } from "primereact/button";
@@ -211,7 +211,7 @@ const BookingTable = () => {
             )}
           </Modal.Body>
           <Modal.Footer>
-            <Button label="Đóng" onClick={() => setShowModal(false)} />
+            <Button label="Close" onClick={() => setShowModal(false)} />
           </Modal.Footer>
         </Modal>
       </div>

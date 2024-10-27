@@ -8,6 +8,8 @@ export type UserType = {
   lastName: string;
   role: string;
   phone: string;
+  verificationToken?: string;
+  isVerified: boolean;
   status: "Active" | "Inactive" | "Banned"; // user status
 };
 
@@ -42,19 +44,20 @@ export type HotelType = {
   starRating: number;
   imageUrls: string[]; // Array of hotel image URLs
   verify: string;
+  rooms: RoomType[];
 };
 
 export type BookingType = {
   _id: string;
-  userId: ObjectId; // User making the booking
-  hotelId: ObjectId; // Hotel being booked
-  roomTypeId: ObjectId; // Specific room type being booked
+  userId: UserType; // User making the booking
+  hotelId: HotelType; // Hotel being booked
+  roomId: RoomType; // Specific room type being booked
   adultCount: number;
   childCount: number;
   checkIn: Date;
   checkOut: Date;
   totalCost: number;
-  status: string; // "pending" | "confirmed" | "canceled" | "completed";
+  status: string; // "canceled" | "success";
 };
 
 export type HotelSearchResponse = {

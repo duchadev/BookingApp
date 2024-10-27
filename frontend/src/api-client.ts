@@ -1,13 +1,13 @@
 import { RegisterFormData } from "./pages/Register";
 import { SignInFormData } from "./pages/SignIn";
 import {
+  BookingType,
   HotelSearchResponse,
   HotelType,
   PaymentIntentResponse,
   RoomType,
   UserType,
 } from "../../backend/src/shared/types";
-import { BookingFormData } from "./forms/BookingForm/BookingForm";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 export const fetchCurrentUser = async (): Promise<UserType> => {
@@ -20,20 +20,67 @@ export const fetchCurrentUser = async (): Promise<UserType> => {
   return response.json();
 };
 
+export const sendEmail = async (
+  to: string | undefined,
+  subject: string,
+  html: string
+) => {
+  try {
+    if (!to || !subject || !html) {
+      throw new Error("Email parameters are missing");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/send-email`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ to, subject, html }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to send email. Status: ${response.status}`);
+    }
+
+    console.log("Email sent successfully!");
+  } catch (error) {
+    console.error("Failed to send email:", error);
+  }
+};
+
 export const register = async (formData: RegisterFormData) => {
-  const response = await fetch(`${API_BASE_URL}/api/users/register`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(formData),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/users/register`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
 
-  const responseBody = await response.json();
+    if (!response.ok) {
+      // Lấy dữ liệu lỗi từ phản hồi (nếu có)
+      const errorData = await response.json();
 
-  if (!response.ok) {
-    throw new Error(responseBody.message);
+      // Ném ra lỗi với thông tin từ phản hồi và mã trạng thái
+      throw { errorData, status: response.status };
+    }
+
+    // Nếu thành công, trả về dữ liệu JSON
+    return await response.json();
+  } catch (error: any) {
+    // Nếu lỗi là lỗi tùy chỉnh từ phía trên, ném lại lỗi với chi tiết
+    if (error.errorData && error.status) {
+      throw {
+        message: error.errorData.message[0].msg,
+        errorData: error.errorData.message,
+        status: error.status,
+      };
+    }
+
+    // Ném lỗi chung nếu lỗi không phải là từ response
+    throw new Error(error.message || "An unknown error occurred");
   }
 };
 
@@ -134,19 +181,6 @@ export const updateMyHotelById = async (hotelFormData: FormData) => {
 };
 
 export const addRoom = async (roomFormData: FormData) => {
-  // const response = await fetch(`${API_BASE_URL}/api/rooms`, {
-  //   method: "POST",
-  //   credentials: "include",
-  //   body: roomFormData,
-  // });
-
-  // if (!response.ok) {
-  //   throw new Error("Failed to add room");
-  // }
-
-  // return response.json();
-
-  // --------
   try {
     const response = await fetch(`${API_BASE_URL}/api/rooms`, {
       method: "POST",
@@ -206,7 +240,9 @@ export const updateRoomById = async (roomFormData: FormData) => {
       {
         method: "PUT",
         body: roomFormData,
-        credentials: "include",
+        credentials: "include", // cho phép các yêu cầu HTTP bao gồm cookies, session token hoặc bất kỳ thông tin xác thực nào khác khi yêu cầu được gửi tới API. Cụ thể:
+        // Giá trị "include": Buộc phải đính kèm thông tin xác thực (như cookies) trong mọi yêu cầu, bất kể nguồn gốc của tài nguyên được yêu cầu (cùng nguồn hoặc khác nguồn).
+        // Cần thiết khi: API yêu cầu thông tin xác thực để nhận dạng người dùng hoặc quản lý phiên làm việc.
       }
     );
 
@@ -229,8 +265,33 @@ export const updateRoomById = async (roomFormData: FormData) => {
   }
 };
 
-export const deleteRoomById = async (roomId: string) => {
+export const deleteRoomById = async (roomId?: string | null) => {
   const response = await fetch(`${API_BASE_URL}/api/rooms/${roomId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete room");
+  }
+
+  return response.json();
+};
+export const deleteBookingById = async (roomId?: string | null) => {
+  const response = await fetch(`${API_BASE_URL}/api/rooms/${roomId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete room");
+  }
+
+  return response.json();
+};
+
+export const deleteRoomsByType = async (roomType: string) => {
+  const response = await fetch(`${API_BASE_URL}/api/rooms/type/${roomType}`, {
     method: "DELETE",
     credentials: "include",
   });
@@ -328,26 +389,9 @@ export const createPaymentIntent = async (
   return response.json();
 };
 
-export const createRoomBooking = async (formData: BookingFormData) => {
-  const response = await fetch(
-    `${API_BASE_URL}/api/hotels/${formData.hotelId}/bookings`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(formData),
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Error booking room");
-  }
-};
-
-export const fetchMyBookings = async (): Promise<HotelType[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/my-bookings`, {
+export const fetchMyBookings = async (): Promise<BookingType[]> => {
+  // userId có trong request bên frontend lẫn backend rồi
+  const response = await fetch(`${API_BASE_URL}/api/bookings/my-bookings`, {
     credentials: "include",
   });
 
@@ -357,12 +401,12 @@ export const fetchMyBookings = async (): Promise<HotelType[]> => {
 
   return response.json();
 };
+
 export const fetchFeedbacks = async () => {
   const response = await fetch(`${API_BASE_URL}/api/feedback/feedback`);
   if (!response.ok) {
     throw new Error("Failed to fetch feedback");
   }
-  console.log(response);
   return response.json();
 };
 // api-client.js
@@ -377,27 +421,108 @@ export const submitFeedback = async (feedbackData: any) => {
   });
 
   if (!response.ok) {
-    throw new Error("Error submitting feedback");
+    // Lấy dữ liệu lỗi từ phản hồi (nếu có)
+    const errorData = await response.json();
+
+    // Ném ra lỗi với thông tin từ phản hồi và mã trạng thái
+    throw { errorData, status: response.status };
   }
 
   return response.json(); // Return the response data
 };
 
 export const fetchFeedbackByHotel = async (hotelId: string) => {
-  const response = await fetch(`${API_BASE_URL}/api/feedback/get/${hotelId}`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch feedback");
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/feedback/get/${hotelId}`);
+
+    if (!response.ok) {
+      // Lấy dữ liệu lỗi từ phản hồi (nếu có)
+      const errorData = await response.json();
+
+      // Ném ra lỗi với thông tin từ phản hồi và mã trạng thái
+      throw { errorData, status: response.status };
+    }
+
+    // Trả về phản hồi JSON nếu thành công
+    return await response.json();
+  } catch (error: any) {
+    // Nếu lỗi là lỗi tùy chỉnh từ phía trên, ném lại lỗi với chi tiết
+    if (error.errorData && error.status) {
+      throw {
+        message: "Failed to fetch feedback",
+        errorData: error.errorData,
+        status: error.status,
+      };
+    }
+
+    // Ném lỗi chung nếu lỗi không phải là từ response
+    throw new Error(error.message || "An unknown error occurred");
   }
-  console.log(response);
-  return response.json();
 };
 export const fetchTop5Feedback = async (hotelId: string) => {
-  const response = await fetch(
-    `${API_BASE_URL}/api/feedback/top-feedback/${hotelId}`
-  );
-  if (!response.ok) {
-    throw new Error("Failed to fetch feedback");
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/feedback/top-feedback/${hotelId}`
+    );
+
+    if (!response.ok) {
+      // Lấy dữ liệu lỗi từ phản hồi (nếu có)
+      const errorData = await response.json();
+
+      // Ném ra lỗi với thông tin từ phản hồi và mã trạng thái
+      throw { errorData, status: response.status };
+    }
+
+    // Nếu thành công, trả về dữ liệu JSON
+    return await response.json();
+  } catch (error: any) {
+    // Nếu lỗi là lỗi tùy chỉnh từ phía trên, ném lại lỗi với chi tiết
+    if (error.errorData && error.status) {
+      throw {
+        message: "Failed to fetch feedback",
+        errorData: error.errorData,
+        status: error.status,
+      };
+    }
+
+    // Ném lỗi chung nếu lỗi không phải là từ response
+    throw new Error(error.message || "An unknown error occurred");
   }
-  console.log(response);
-  return response.json();
+};
+
+export const addBooking = async (bookingData: any) => {
+  try {
+    console.log("booking: ", bookingData);
+    const response = await fetch(`${API_BASE_URL}/api/bookings`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(bookingData),
+    });
+
+    if (!response.ok) {
+      // Lấy dữ liệu lỗi từ phản hồi (nếu có)
+      const errorData = await response.json();
+
+      // Ném ra lỗi với thông tin từ phản hồi và mã trạng thái
+      throw { errorData, status: response.status };
+    }
+
+    // Nếu thành công, trả về dữ liệu JSON
+    return await response.json();
+  } catch (error: any) {
+    // Nếu lỗi là lỗi tùy chỉnh từ phía trên, ném lại lỗi với chi tiết
+    if (error.errorData && error.status) {
+      throw {
+        message: "Failed to add booking",
+        errorData: error.errorData,
+        status: error.status,
+      };
+    }
+
+    // Ném lỗi chung nếu lỗi không phải là từ response
+    throw new Error(error.message || "An unknown error occurred");
+  }
 };

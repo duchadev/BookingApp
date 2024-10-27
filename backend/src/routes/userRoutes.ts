@@ -3,7 +3,10 @@ import User from "../models/User";
 import jwt from "jsonwebtoken";
 import { check, validationResult } from "express-validator";
 import { verifyToken } from "../middleware/auth";
+import * as crypto from "crypto";
+import { sendVerificationEmail } from "../helpers/sendEmail";
 
+const FRONTEND_URL = process.env.FRONTEND_URL || "hthttp://localhost:5174t";
 const usersRouter = express.Router();
 
 usersRouter.get("/me", verifyToken, async (req: Request, res: Response) => {
@@ -31,7 +34,7 @@ usersRouter.post(
     check("phone", "Phone is required")
       .isString()
       .isMobilePhone("vi-VN")
-      .withMessage("Số điện thoại không hợp lệ!"),
+      .withMessage("Phone is invalid!"),
     check("email", "Email is required").isEmail(),
     check("password", "Password with 6 or more characters required").isLength({
       min: 6,
@@ -48,32 +51,36 @@ usersRouter.post(
 
     try {
       let user = await User.findOne({
-        email: req.body.email,
+        $or: [{ email: req.body.email }, { phone: req.body.phone }],
       });
 
       if (user) {
-        return res.status(400).json({ message: "User already exists" });
+        if (user.email === req.body.email) {
+          return res.status(400).json({ message: "Email already registered" });
+        }
+        if (user.phone === req.body.phone) {
+          return res
+            .status(400)
+            .json({ message: "Phone number already registered" });
+        }
       }
 
+      // Tạo mã xác thực
+      const verificationToken = crypto.randomBytes(32).toString("hex");
+
+      // Tạo người dùng mới với mã xác thực
       user = new User({
         ...req.body,
+        verificationToken,
       });
       await user.save();
 
-      const token = jwt.sign(
-        { userId: user.id, role: user.role, email: user.email }, // đkí claims vào token khi register (phải giống vs claims bên login)
-        process.env.JWT_SECRET_KEY as string,
-        {
-          expiresIn: "1d",
-        }
-      );
+      // Gửi email xác thực
+      sendVerificationEmail(user.email, verificationToken);
 
-      res.cookie("auth_token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 86400000,
+      return res.status(200).send({
+        message: "Please check your email to verify your account.",
       });
-      return res.status(200).send({ message: "User registered OK" });
     } catch (error) {
       console.log(error);
       res
@@ -82,6 +89,34 @@ usersRouter.post(
     }
   }
 );
+
+usersRouter.get("/verify-email", async (req: Request, res: Response) => {
+  const { token } = req.query;
+
+  try {
+    const user = await User.findOne({ verificationToken: token });
+
+    if (!user) {
+      // return res.status(400).json({ message: "Invalid or expired token" });
+
+      // Redirect đến trang lỗi xác thực nếu token không hợp lệ
+      return res.redirect(`${FRONTEND_URL}/email-verification-failed`);
+    }
+
+    user.isVerified = true;
+    user.verificationToken = undefined; // Xóa mã xác thực sau khi xác thực thành công
+    await user.save();
+
+    // res.status(200).json({ message: "Email verified successfully!" });
+    // Redirect đến trang xác thực thành công trên frontend
+    res.redirect(`${FRONTEND_URL}/sign-in`);
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong", error: error.message });
+  }
+});
 
 usersRouter.put(
   "/:id",

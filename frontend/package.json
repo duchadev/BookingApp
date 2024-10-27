@@ -19,6 +19,7 @@
     "jquery": "^3.7.1",
     "leaflet": "^1.9.4",
     "leaflet-control-geocoder": "^2.4.0",
+    "moment-timezone": "^0.5.46",
     "owl.carousel": "^2.3.4",
     "primeicons": "^7.0.0",
     "primereact": "^10.8.3",

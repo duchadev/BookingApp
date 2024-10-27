@@ -30,7 +30,6 @@ const PropertyList: React.FC<FeaturedProps> = ({ hotels, isLoading }) => {
     (hotel) => hotel.type === "Resort"
   ).length;
   const villasCount = hotels?.filter((hotel) => hotel.type === "Villa").length;
-  const cabinsCount = hotels?.filter((hotel) => hotel.type === "Cabin").length;
 
   return (
     <div className="pList pl-8">

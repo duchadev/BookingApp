@@ -4,6 +4,7 @@ import Feedback from "../models/feedback";
 import Hotel from "../models/Hotel";
 import User from "../models/User";
 import { verifyToken } from "../middleware/auth";
+import Booking from "../models/Booking";
 const feedbackRoutes = express.Router();
 // add new feedback
 feedbackRoutes.post(
@@ -11,21 +12,35 @@ feedbackRoutes.post(
   verifyToken,
   async (req: Request, res: Response) => {
     try {
-      const { hotelId, rating, comment } = req.body;
+      const { hotelId, bookingId, rating, comment } = req.body;
       const userId = req.userId; // Get the userId from the verified token
-
-      // Check if the hotel exists
-      const hotel = await Hotel.findById(hotelId);
-      if (!hotel) {
+      console.log(req.body);
+      // Check if the bookings exists
+      const bookingSuccessOfHotel = await Booking.findOne({
+        hotelId: hotelId,
+        _id: bookingId,
+      });
+      console.log("booking: ", bookingSuccessOfHotel);
+      if (!bookingSuccessOfHotel) {
         return res
-          .status(400)
-          .json({ error: "Invalid hotel ID. Hotel not found." });
+          .status(404)
+          .json({ error: "Invalid BookingID. BookingID not found." });
       }
-      console.log(hotel);
+      if (bookingSuccessOfHotel.status === "pending") {
+        return res.status(400).json({
+          error: "You must pay the booking fee and experience the room first.",
+        });
+      } else if (bookingSuccessOfHotel.status === "canceled") {
+        return res.status(400).json({
+          error: "Your booking has been cancelled.",
+        });
+      }
+
       // Create new feedback
       const feedback = new Feedback({
         userId,
         hotelId,
+        bookingId,
         rating,
         comment,
       });
@@ -48,6 +63,7 @@ feedbackRoutes.post(
         .status(201)
         .json({ message: "Feedback submitted successfully", feedback });
     } catch (error) {
+      console.error(error);
       res.status(500).json({ error: "Failed to submit feedback" });
     }
   }
@@ -153,21 +169,21 @@ feedbackRoutes.get(
     try {
       const { hotelId } = req.params;
 
-      // Fetch top 5 feedbacks by hotel ID, sorted by starRating in descending order
-      const topFeedbacks = await Feedback.find({ hotelId })
+      // Fetch top 5 feedbacks by hotel ID with rating 5, sorted by createdAt (newest first)
+      const topFeedbacks = await Feedback.find({ hotelId, rating: 5 })
         .populate("userId", "firstName lastName")
         .populate("hotelId", "name")
-        .sort({ rating: -1 }) // Sort by starRating in descending order
+        .sort({ createdAt: -1 }) // Sort by createdAt in descending order (newest first)
         .limit(5); // Limit the results to top 5 feedbacks
 
       // If no feedback found, return 404
       if (topFeedbacks.length === 0) {
-        return res
-          .status(404)
-          .json({ message: "No feedback found for this hotel." });
+        return res.status(404).json({
+          message: "No feedback with a 5-star rating found for this hotel.",
+        });
       }
 
-      // Return the top 5 feedbacks
+      // Return the top 5 feedbacks with rating 5
       res.status(200).json(topFeedbacks);
     } catch (error) {
       // Handle error
@@ -177,3 +193,12 @@ feedbackRoutes.get(
 );
 
 export default feedbackRoutes;
+
+/**
+ * - Hiện danh sách trong My-Booking
+ * - Làm sao có thể tự động đổi status của Booking khi user ko thanh toán
+ * - Làm sao có thể tự load Feedback khi add new
+ * - Xong phần search cơ bản
+ * - Deploy
+ *
+ */

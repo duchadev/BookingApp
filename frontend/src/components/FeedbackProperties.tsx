@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { Carousel, CarouselResponsiveOption } from "primereact/carousel";
 import { FeedbackType } from "../../../backend/src/shared/types"; // Import the FeedbackType
-import FeedbackModal from './FeedbackModalProps'; // Fix the import path
 import "../assets/css/featuredProperties.css";
 import { Rating } from "primereact/rating";
-import { fetchFeedbackByHotel } from '../api-client'; 
+import { fetchFeedbackByHotel } from "../api-client";
+import { ProgressSpinner } from "primereact/progressspinner";
 
 interface FeedbackProps {
   hotelId: string;
@@ -13,9 +13,6 @@ interface FeedbackProps {
 const FeedbackProperties: React.FC<FeedbackProps> = ({ hotelId }) => {
   const [feedbacks, setFeedbacks] = useState<FeedbackType[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [visible, setVisible] = useState(false);  // Initialize 'visible' state
-  const [selectedFeedback, setSelectedFeedback] = useState<FeedbackType | null>(null);  // Initialize 'selectedFeedback' state
 
   // Fetch feedback data when component mounts or hotelId changes
   useEffect(() => {
@@ -25,14 +22,14 @@ const FeedbackProperties: React.FC<FeedbackProps> = ({ hotelId }) => {
         const data = await fetchFeedbackByHotel(hotelId);
         setFeedbacks(data); // Update state with the fetched feedbacks
       } catch (error) {
-        setError(error instanceof Error ? error.message : "An unknown error occurred");
+        console.log(error);
       } finally {
         setLoading(false);
       }
     };
 
     getFeedbacks();
-  }, [hotelId]);
+  }, []);
 
   const responsiveOptions: CarouselResponsiveOption[] = [
     { breakpoint: "1400px", numVisible: 4, numScroll: 1 },
@@ -46,10 +43,6 @@ const FeedbackProperties: React.FC<FeedbackProps> = ({ hotelId }) => {
       <div
         key={feedback._id}
         className="relative cursor-pointer overflow-hidden rounded-md"
-        onClick={() => {
-          setSelectedFeedback(feedback); // Set the selected feedback
-          setVisible(true); // Show the modal
-        }}
       >
         <div className="fpItem mr-4">
           <span className="fpName">{`${feedback.userId.firstName} ${feedback.userId.lastName}`}</span>
@@ -66,24 +59,26 @@ const FeedbackProperties: React.FC<FeedbackProps> = ({ hotelId }) => {
   return (
     <>
       {loading ? (
-        <div>Loading feedback...</div>
-      ) : error ? (
-        <div>Error: {error}</div>
+        <div className="flex justify-center items-center h-full">
+          <ProgressSpinner />
+        </div>
+      ) : feedbacks.length === 0 ? (
+        <div className="no-feedback-message text-center p-4">
+          <h4 className="text-xl font-bold">No Feedback Available</h4>
+          <p>This hotel has not been reviewed by any users yet.</p>
+        </div>
       ) : (
-        feedbacks && feedbacks.length > 0 && (
-          <Carousel
-            value={feedbacks}
-            numVisible={4}
-            numScroll={3}
-            responsiveOptions={responsiveOptions}
-            itemTemplate={feedbackTemplate}
-            className="custom-carousel"
-            circular
-            autoplayInterval={3000}
-          />
-        )
+        <Carousel
+          value={feedbacks}
+          numVisible={4}
+          numScroll={3}
+          responsiveOptions={responsiveOptions}
+          itemTemplate={feedbackTemplate}
+          className="custom-carousel"
+          circular
+          autoplayInterval={3000}
+        />
       )}
-   
     </>
   );
 };

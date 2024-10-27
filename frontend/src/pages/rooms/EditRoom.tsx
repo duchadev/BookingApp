@@ -42,7 +42,7 @@ const EditRoom = () => {
 
   const { mutate, isLoading } = useMutation(apiClient.updateRoomById, {
     onSuccess: () => {
-      showToast({ message: "Room Saved!", type: "SUCCESS" });
+      showToast({ message: "Room Edited!", type: "SUCCESS" });
     },
     onError: (error: unknown) => {
       // showToast({ message: "Error Edit Room", type: "ERROR" });

@@ -13,6 +13,11 @@ const feedbackSchema = new mongoose.Schema(
       ref: "Hotel", // Tham chiếu đến HotelSchema
       required: true,
     },
+    bookingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Booking", // Tham chiếu đến BookingSchema
+      required: true,
+    },
     rating: {
       type: Number,
       required: true,

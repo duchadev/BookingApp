@@ -34,14 +34,13 @@ const FeaturedProperties: React.FC<FeaturedProps> = ({ hotels }) => {
 
   const hotelTemplate = (hotel: HotelType) => {
     // Tính toán minPrice và maxPrice cho từng khách sạn
-    let minPrice, maxPrice;
+    let minPrice;
     // console.log(hotel);
-    if (hotel.rooms && hotel.rooms.length > 0) {
+    if (hotel?.rooms && hotel?.rooms.length > 0) {
       const prices = hotel.rooms.map((room) => room.pricePerNight);
       minPrice = Math.min(...prices);
-      maxPrice = Math.max(...prices);
     } else {
-      minPrice = maxPrice = "N/A"; // Giá trị mặc định nếu không có rooms
+      minPrice = "N/A"; // Giá trị mặc định nếu không có rooms
     }
 
     return (

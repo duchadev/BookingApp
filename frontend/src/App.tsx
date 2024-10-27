@@ -79,7 +79,7 @@ const App = () => {
         <Route
           path="/hotel/:hotelId/booking"
           element={
-            <ProtectedRoute roles={["user", "admin"]}>
+            <ProtectedRoute roles={["user", "hotel_manager", "admin"]}>
               <Layout>
                 <Booking />
               </Layout>
@@ -159,7 +159,7 @@ const App = () => {
         <Route
           path="/my-bookings"
           element={
-            <ProtectedRoute roles={["user", "admin"]}>
+            <ProtectedRoute roles={["user", "hotel_manager", "admin"]}>
               <Layout>
                 <MyBookings />
               </Layout>

@@ -6,6 +6,16 @@ type Props = {
 };
 
 const SearchResultsCard = ({ hotel }: Props) => {
+  // Tính toán minPrice và maxPrice cho từng khách sạn
+  let minPrice;
+  // console.log(hotel);
+  if (hotel?.rooms && hotel?.rooms.length > 0) {
+    const prices = hotel.rooms.map((room) => room.pricePerNight);
+    minPrice = Math.min(...prices);
+  } else {
+    minPrice = "N/A"; // Giá trị mặc định nếu không có rooms
+  }
+
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[2fr_3fr] border border-slate-300 rounded-lg p-8 gap-8">
       <div className="w-full h-[300px]">
@@ -49,7 +59,7 @@ const SearchResultsCard = ({ hotel }: Props) => {
             </span>
           </div>
           <div className="flex flex-col items-end gap-1">
-            <span className="font-bold">VND {hotel.pricePerNight} per night</span>
+            <span className="font-bold">VND {minPrice} per night</span>
             <Link
               to={`/detail/${hotel._id}`}
               className="bg-blue-600 text-white h-full p-2 font-bold text-xl max-w-fit hover:bg-blue-500"

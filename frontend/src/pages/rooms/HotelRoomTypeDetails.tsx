@@ -1,13 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "react-query";
-import { DataTable, DataTableRowEditCompleteEvent } from "primereact/datatable";
-import { Column, ColumnEditorOptions } from "primereact/column";
+import { useMutation, useQueryClient } from "react-query";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import {
-  InputNumber,
-  InputNumberValueChangeEvent,
-} from "primereact/inputnumber";
-import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
 import axios from "axios";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -18,10 +13,9 @@ import { Toolbar } from "primereact/toolbar";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { deleteRoomById } from "../../api-client";
-import { RoomType } from "../../../../backend/src/shared/types";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
-import { hotelTypes } from "../../config/hotel-options-config";
+import { RoomType } from "../../../../backend/src/shared/types";
 
 // Define Room interface
 interface Room {
@@ -40,7 +34,7 @@ interface Room {
 
 export const HotelRoomTypeDetails = () => {
   const emptyRoom: Room = {
-    _id: null,
+    _id: "null",
     hotelId: "",
     hotelNumber: "",
     type: "",
@@ -49,6 +43,18 @@ export const HotelRoomTypeDetails = () => {
     imageUrls: [],
     description: "",
     status: "Available",
+
+    //   _id: string;
+    // roomNumber: string; // Số phòng, có thể là một chuỗi như "101", "202", v.v.
+    // hotelId: ObjectId;
+    // type: string; // Single, Double, Suite, etc.
+    // capacity: number; // Maximum capacity for people
+    // pricePerNight: number;
+    // imageUrls: string[];
+    // description?: string; // Optional description for each room type
+    // size: number;
+    // facilities: string[];
+    // status: "Booked" | "Available";
   };
   const navigate = useNavigate();
   const { hotelId, roomType } = useParams();
@@ -59,7 +65,7 @@ export const HotelRoomTypeDetails = () => {
   const dt = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
   const [rooms, setRooms] = useState<Room[]>([]);
-  const [room, setRoom] = useState(emptyRoom);
+  const [room, setRoom] = useState<Room>(emptyRoom);
   // Delete room
   const [deleteRoomDialog, setDeleteRoomDialog] = useState(false);
   // Search
@@ -96,7 +102,7 @@ export const HotelRoomTypeDetails = () => {
       setIsLoading(false);
       return data;
     } catch (err: any) {
-      toast.current.show({
+      toast?.current?.show({
         severity: "error",
         summary: "Error",
         detail: "Load room failed",
@@ -132,8 +138,6 @@ export const HotelRoomTypeDetails = () => {
       });
     },
   });
-
-  const [statuses] = React.useState<string[]>(["Booked", "Available"]);
 
   const getSeverity = (value: string) => {
     switch (value) {
@@ -236,7 +240,7 @@ export const HotelRoomTypeDetails = () => {
   const hideDeleteRoomDialog = () => {
     setDeleteRoomDialog(false);
   };
-  const confirmDeleteRoom = (room) => {
+  const confirmDeleteRoom = (room: Room) => {
     console.log(room);
     setRoom(room);
     setDeleteRoomDialog(true);
@@ -266,11 +270,11 @@ export const HotelRoomTypeDetails = () => {
       />
     </React.Fragment>
   );
-  const editProduct = (room) => {
+  const editProduct = (room: Room) => {
     navigate(`/hotel/${hotel?._id}/rooms/edit/${room._id}`);
   };
 
-  const actionBodyTemplate = (roomData) => {
+  const actionBodyTemplate = (roomData: Room) => {
     return (
       <React.Fragment>
         <Button
