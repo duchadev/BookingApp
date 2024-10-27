@@ -9,7 +9,14 @@ import { useQuery, useMutation } from "react-query";
 import { useNavigate } from "react-router-dom"; // Assuming you're using react-router-dom for navigation
 import { HotelType } from "../../../backend/src/shared/types";
 
-const FeedbackComponent = ({ hotel }: { hotel: HotelType }) => {
+interface ApiError {
+  errorData?: {
+    error?: string;
+  };
+  message?: string; // Thêm các thuộc tính khác nếu cần
+}
+
+const FeedbackComponent = ({ hotel }: { hotel?: HotelType }) => {
   const [visible, setVisible] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [bookingId, setBookingId] = useState("");
@@ -35,13 +42,14 @@ const FeedbackComponent = ({ hotel }: { hotel: HotelType }) => {
       setValue(undefined);
       setBookingId("");
       setIsSubmitting(false);
+      window.location.reload(); // Reload trang sau khi xóa thành công
     },
-    onError: (error: unknown) => {
+    onError: (error: ApiError) => {
       console.error("Error submitting feedback:", error);
 
       // Capture error message from the response (assuming the error is from API)
-      if (error?.errorData?.error) {
-        setErrorMessage(error?.errorData?.error); // Display API error
+      if (error.errorData?.error) {
+        setErrorMessage(error.errorData.error); // Display API error
       } else {
         setErrorMessage("Invalid BookingID or Wrong Hotel"); // Generic error message
       }
@@ -57,7 +65,7 @@ const FeedbackComponent = ({ hotel }: { hotel: HotelType }) => {
   const handleSubmit = () => {
     // Prepare feedback data to send
     const feedbackData = {
-      hotelId: hotel._id,
+      hotelId: hotel?._id,
       bookingId,
       rating: value,
       comment: feedback,

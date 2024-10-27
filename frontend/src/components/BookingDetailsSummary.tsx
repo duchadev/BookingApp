@@ -21,7 +21,7 @@ type Props = {
   hotel: HotelType;
   roomSeleted: RoomType;
   pricePerNight: number;
-  currentUser: UserType;
+  currentUser?: UserType;
 };
 
 const BookingDetailsSummary = ({
@@ -135,9 +135,9 @@ const BookingDetailsSummary = ({
       description: `Booking ${hotel.name}`, // bị giới hạn kí tự
       returnUrl: `${FRONTEND_BASE_URL}`, // back home page
       cancelUrl: `${FRONTEND_BASE_URL}`, // back home page
-      buyerName: `${currentUser.firstName} ${currentUser.lastName}`,
-      buyerEmail: `${currentUser.email}`,
-      buyerPhone: `${currentUser.phone}`,
+      buyerName: `${currentUser?.firstName} ${currentUser?.lastName}`,
+      buyerEmail: `${currentUser?.email}`,
+      buyerPhone: `${currentUser?.phone}`,
       //   items: [
       //     {
       //       name: "Iphone",
@@ -185,30 +185,19 @@ const BookingDetailsSummary = ({
     <>
       <Toast ref={toast} />
       <ConfirmPopup
-        target={buttonEl.current}
+        target={buttonEl.current || undefined}
         visible={visible}
         onHide={() => setVisible(false)}
         message="Choose your payment method:"
         icon="pi pi-exclamation-triangle"
-        acceptLabel={
-          <>
-            <Button
-              className="ml-1 px-2 py-1 bg-blue-500 text-white flex justify-content-center rounded hover:bg-blue-700"
-              label="Online"
-            />
-          </>
-        }
-        rejectLabel={
-          <>
-            <Button
-              className="px-2 py-1  text-blue-500 flex justify-content-center rounded hover:bg-gray-100"
-              label="Offline"
-            />
-          </>
-        }
+        acceptLabel="Online"
+        rejectLabel="Offline"
+        acceptClassName="ml-1 px-2 py-1 bg-blue-500 text-white flex justify-content-center rounded hover:bg-blue-700"
+        rejectClassName="px-2 py-1 text-blue-500 flex justify-content-center rounded hover:bg-gray-100"
         accept={() => accept("online")}
         reject={() => accept("offline")}
       />
+
       <div className="grid gap-4 rounded-lg border border-slate-300 p-5 h-fit">
         <h2 className="text-xl font-bold">Your Booking Details</h2>
         <div className="border-b py-2">
@@ -251,7 +240,7 @@ const BookingDetailsSummary = ({
           ref={buttonEl}
           onClick={() => setVisible(true)}
           icon="pi pi-check"
-          label={<>{loading ? "Processing..." : "Confirm Booking"}</>}
+          label={loading ? "Processing..." : "Confirm Booking"}
         />
       </div>
     </>

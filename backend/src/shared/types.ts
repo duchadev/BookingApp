@@ -22,6 +22,7 @@ export type RoomType = {
   capacity: number; // Maximum capacity for people
   pricePerNight: number;
   imageUrls: string[];
+  imageFiles: FileList;
   description?: string; // Optional description for each room type
   size: number;
   facilities: string[];

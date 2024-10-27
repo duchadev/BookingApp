@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useQuery } from "react-query";
 import * as apiClient from "../api-client";
 import "../assets/css/home.css";
 import Featured from "../components/Featured";
@@ -13,7 +13,6 @@ import BookingPendingEmail from "../components/BookingPendingEmail";
 
 const Home = () => {
   const location = useLocation();
-  const queryClient = useQueryClient();
 
   // Get the status from query parameters
   const query = new URLSearchParams(location.search);
@@ -25,18 +24,6 @@ const Home = () => {
     () => apiClient.fetchHotels()
   );
   const bookingDetails = location.state; // Lấy dữ liệu từ state
-
-  // Mutation for deleting a room
-  const deleteBookingMutation = useMutation(apiClient.deleteBookingById, {
-    onSuccess: () => {
-      // Invalidate and refetch rooms after deletion
-      // queryClient.invalidateQueries("rooms");
-      alert("Delete the booking successfully");
-    },
-    onError: () => {
-      alert("Failed to delete the booking");
-    },
-  });
 
   useEffect(() => {
     if (bookingDetails) {

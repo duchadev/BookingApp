@@ -76,6 +76,7 @@ export const AppContextProvider = ({
         showToast,
         isLoggedIn: !isError && isLoggedIn,
         role,
+        email,
       }}
     >
       {toast && (

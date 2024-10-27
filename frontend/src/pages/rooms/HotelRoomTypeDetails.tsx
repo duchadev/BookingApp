@@ -15,7 +15,7 @@ import { Dialog } from "primereact/dialog";
 import { deleteRoomById } from "../../api-client";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
-import { RoomType } from "../../../../backend/src/shared/types";
+import { HotelType } from "../../../../backend/src/shared/types";
 
 // Define Room interface
 interface Room {
@@ -59,9 +59,9 @@ export const HotelRoomTypeDetails = () => {
   const navigate = useNavigate();
   const { hotelId, roomType } = useParams();
   const queryClient = useQueryClient();
-  const [hotel, setHotel] = useState(null);
+  const [hotel, setHotel] = useState<HotelType | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const toast = useRef(null);
+  const toast = useRef<Toast | null>(null);
   const dt = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -206,7 +206,7 @@ export const HotelRoomTypeDetails = () => {
       ),
     },
     {
-      label: { roomType },
+      label: roomType,
       template: () => (
         <>
           <a className="text-primary font-semibold text-blue-600">{roomType}</a>
@@ -318,7 +318,9 @@ export const HotelRoomTypeDetails = () => {
           <InputText
             type="search"
             className="w-full"
-            onInput={(e) => setGlobalFilter(e.target.value)}
+            onInput={(e) =>
+              setGlobalFilter((e.target as HTMLInputElement).value)
+            }
             placeholder="Search..."
           />
         </div>

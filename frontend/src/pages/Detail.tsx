@@ -11,14 +11,25 @@ import MapComponent from "./MapComponent";
 import "../assets/css/demo.css";
 import BookingTable from "../components/BookingTable";
 import FeedbackComponent from "../../src/components/FeedbackComponent";
-import { Button } from "primereact/button";
 import FeedbackProperties from "../components/FeedbackProperties";
-import HotelFeedBackProperty from "../components/HotelFeedBackProperty";
+import { RoomType } from "../../../backend/src/shared/types";
+import HotelFeedBackProperty from "../components/HotelFeedbackProperty";
+
+interface Item {
+  thumbnailImageSrc: string;
+  alt: string;
+  itemImageSrc: string;
+}
+interface CustomImageData {
+  itemImageSrc: string;
+  thumbnailImageSrc: string;
+  alt: string;
+}
 
 const Detail = () => {
   const { hotelId } = useParams();
-  const [images, setImages] = useState([]); // Thay đổi giá trị khởi tạo thành mảng rỗng
-  const menu = useRef(null);
+  const [images, setImages] = useState<CustomImageData[]>([]); // Thay đổi giá trị khởi tạo thành mảng rỗng
+  const menu = useRef<TieredMenu | null>(null);
   const [mapPosition, setMapPosition] = useState<[number, number] | null>(null);
   const [minPrice, setMinPrice] = useState(0);
 
@@ -34,18 +45,7 @@ const Detail = () => {
       enabled: !!hotelId,
     }
   );
-  const {
-    data: feedbacks,
-    isLoading: feedbacksLoading,
-    isError: feedbacksError,
-  } = useQuery("fetchFeedbacks", () => apiClient.fetchFeedbacks());
-  const { data: feedbacksByHotel } = useQuery(
-    "fetchRoomsByHotelId",
-    () => apiClient.fetchRoomsByHotelId(hotelId || ""),
-    {
-      enabled: !!hotelId,
-    }
-  );
+
   const { data: rooms } = useQuery(
     "fetchRoomsByHotelId",
     () => apiClient.fetchRoomsByHotelId(hotelId || ""),
@@ -58,7 +58,7 @@ const Detail = () => {
   useEffect(() => {
     if (hotel) {
       setImages(
-        hotel?.imageUrls.map((url) => ({
+        hotel.imageUrls.map((url: string) => ({
           itemImageSrc: url,
           thumbnailImageSrc: url, // Có thể thay đổi thumbnail nếu cần
           alt: hotel.name,
@@ -66,8 +66,8 @@ const Detail = () => {
       );
 
       // Extract minPrice from roomPrices if it exists
-      if (rooms && rooms.length > 0) {
-        const prices = rooms.map((room) => room.pricePerNight);
+      if (rooms && rooms?.length > 0) {
+        const prices = rooms.map((room: RoomType) => room.pricePerNight);
         const minRoomPrice = Math.min(...prices);
         setMinPrice(minRoomPrice);
       }
@@ -114,7 +114,7 @@ const Detail = () => {
     },
   ];
 
-  const itemTemplate = (item) => {
+  const itemTemplate = (item: Item) => {
     return (
       <img
         src={item.itemImageSrc}
@@ -124,7 +124,7 @@ const Detail = () => {
     );
   };
 
-  const thumbnailTemplate = (item) => {
+  const thumbnailTemplate = (item: Item) => {
     return (
       <img
         src={item.thumbnailImageSrc}
@@ -148,18 +148,10 @@ const Detail = () => {
 
   const items2 = [
     {
-      label: (
-        <>
-          <h2 className="font-bold">Share this property</h2>
-        </>
-      ),
+      label: "Share this property", // Chỉ dùng string
     },
     {
-      label: (
-        <>
-          <p>Copy link</p>
-        </>
-      ),
+      label: "Copy link", // Chỉ dùng string
       icon: "pi pi-clipboard",
       command: () => copyLink(),
     },
@@ -190,24 +182,30 @@ const Detail = () => {
         <div className="flex space-x-4">
           <div className="flex-1 ">
             <span className="flex items-center space-x-1">
-              {Array.from({ length: 5 }).map((_, index) => {
-                if (index < hotel.starRating) {
+              {hotel &&
+                Array.from({ length: 5 }).map((_, index) => {
+                  if (index < hotel.starRating) {
+                    return (
+                      <i
+                        key={index}
+                        className="pi pi-star-fill text-yellow-400"
+                      ></i>
+                    );
+                  }
+
                   return (
                     <i
                       key={index}
-                      className="pi pi-star-fill text-yellow-400"
+                      className="pi pi-star-fill text-gray-300"
                     ></i>
                   );
-                }
-
-                return (
-                  <i key={index} className="pi pi-star-fill text-gray-300"></i>
-                );
-              })}
-              <strong className="ml-2 text-yellow-600 font-bold text-lg flex items-center">
-                <i className="pi pi-crown mr-1 text-yellow-600"></i>
-                {hotel?.starRating}/5
-              </strong>
+                })}
+              {hotel && (
+                <strong className="ml-2 text-yellow-600 font-bold text-lg flex items-center">
+                  <i className="pi pi-crown mr-1 text-yellow-600"></i>
+                  {hotel.starRating}/5
+                </strong>
+              )}
             </span>
             <h1 className="text-3xl font-bold">{hotel?.name}</h1>
             <i className="pi pi-map-marker" style={{ color: "blue" }}></i>{" "}
@@ -232,7 +230,7 @@ const Detail = () => {
                 href=""
                 onClick={(e) => {
                   e.preventDefault();
-                  menu.current.toggle(e);
+                  menu?.current?.toggle(e);
                 }}
               >
                 <i className="pi pi-share-alt text-blue-600 font-bold text-2xl"></i>
@@ -265,9 +263,9 @@ const Detail = () => {
             </div>
             <div className="flex-1">
               <MapComponent
-                placeName={hotel.name}
-                city={hotel.city}
-                country={hotel.country}
+                placeName={hotel?.name}
+                city={hotel?.city}
+                country={hotel?.country}
                 mapPosition={mapPosition} // Pass the position to the MapComponent
               />
             </div>

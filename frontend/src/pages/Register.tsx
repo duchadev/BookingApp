@@ -1,8 +1,7 @@
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "react-query";
+import { useMutation } from "react-query";
 import * as apiClient from "../api-client";
 import { useAppContext } from "../contexts/AppContext";
-import { useNavigate } from "react-router-dom";
 
 export type RegisterFormData = {
   firstName: string;
@@ -14,8 +13,6 @@ export type RegisterFormData = {
 };
 
 const Register = () => {
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const { showToast } = useAppContext();
 
   const {
@@ -28,11 +25,15 @@ const Register = () => {
   const mutation = useMutation(apiClient.register, {
     onSuccess: async (res) => {
       showToast({ message: res?.message, type: "SUCCESS" });
-      // await queryClient.invalidateQueries("validateToken"); => Ko validate token sau khi register nữa, chỉ có /login
+      // await queryClient.invalidateQueries("validateToken"); => Không validate token sau khi register nữa, chỉ có /login
       // navigate("/login");
     },
-    onError: (error) => {
-      const errorMessage = error.message ? error.message : error.errorData;
+    onError: (error: unknown) => {
+      const errorMessage =
+        (error as { message?: string; errorData?: string }).message ||
+        (error as { errorData?: string }).errorData ||
+        "An unknown error occurred"; // Giá trị mặc định
+
       showToast({ message: errorMessage, type: "ERROR" });
     },
   });

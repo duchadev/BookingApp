@@ -207,9 +207,7 @@ export const addRoom = async (roomFormData: FormData) => {
   }
 };
 
-export const fetchRoomsByHotelId = async (
-  hotelId: string
-): Promise<RoomType> => {
+export const fetchRoomsByHotelId = async (hotelId: string) => {
   const response = await fetch(`${API_BASE_URL}/api/rooms?hotelId=${hotelId}`, {
     credentials: "include",
   });
@@ -277,17 +275,29 @@ export const deleteRoomById = async (roomId?: string | null) => {
 
   return response.json();
 };
-export const deleteBookingById = async (roomId?: string | null) => {
-  const response = await fetch(`${API_BASE_URL}/api/rooms/${roomId}`, {
-    method: "DELETE",
-    credentials: "include",
-  });
 
-  if (!response.ok) {
-    throw new Error("Failed to delete room");
+// Define the delete API call for booking
+export const deleteBookingById = async (bookingId: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/bookings/${bookingId}`, {
+      method: "DELETE",
+      credentials: "include", // Include credentials if required for authentication
+    });
+
+    // Check if the response is unsuccessful
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        `Failed to delete booking: ${response.status} - ${
+          errorData.message || errorData.error || "Unknown error"
+        }`
+      );
+    }
+
+    return response.json();
+  } catch (error: any) {
+    throw new Error(error.message || "An unknown error occurred");
   }
-
-  return response.json();
 };
 
 export const deleteRoomsByType = async (roomType: string) => {
@@ -431,7 +441,7 @@ export const submitFeedback = async (feedbackData: any) => {
   return response.json(); // Return the response data
 };
 
-export const fetchFeedbackByHotel = async (hotelId: string) => {
+export const fetchFeedbackByHotel = async (hotelId?: string) => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/feedback/get/${hotelId}`);
 
@@ -459,7 +469,7 @@ export const fetchFeedbackByHotel = async (hotelId: string) => {
     throw new Error(error.message || "An unknown error occurred");
   }
 };
-export const fetchTop5Feedback = async (hotelId: string) => {
+export const fetchTop5Feedback = async (hotelId?: string) => {
   try {
     const response = await fetch(
       `${API_BASE_URL}/api/feedback/top-feedback/${hotelId}`

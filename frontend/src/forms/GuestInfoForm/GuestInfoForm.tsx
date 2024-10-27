@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import DatePicker from "react-datepicker";
 import { useSearchContext } from "../../contexts/SearchContext";
@@ -15,7 +15,7 @@ import { Tag } from "primereact/tag";
 import axios from "axios";
 import { Toast } from "primereact/toast";
 import { RoomType } from "../../../../backend/src/shared/types";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { ConfirmDialog } from "primereact/confirmdialog";
 
 type Props = {
   hotelId?: string;
@@ -71,7 +71,6 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
     register,
     handleSubmit,
     setValue,
-    getValues,
     formState: { errors },
   } = useForm<GuestInfoFormData>({
     defaultValues: {
@@ -212,7 +211,9 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
           <InputText
             type="search"
             className="w-full"
-            onInput={(e) => setGlobalFilter(e.target.value)}
+            onInput={(e) =>
+              setGlobalFilter((e.target as HTMLInputElement).value)
+            }
             placeholder="Search..."
           />
         </div>

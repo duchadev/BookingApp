@@ -7,12 +7,12 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import ManageRoomForm from "../../forms/ManageRoomForm/ManageRoomForm";
+import { HotelType } from "../../../../backend/src/shared/types";
 
 const AddRoom = () => {
   const { showToast } = useAppContext();
   const { hotelId } = useParams();
-  const [error, setError] = useState<string | null>(null);
-  const [hotel, setHotel] = useState(null);
+  const [hotel, setHotel] = useState<HotelType | null>(null);
 
   // Fetch hotel details
   useEffect(() => {
@@ -26,7 +26,7 @@ const AddRoom = () => {
         );
         setHotel(data);
       } catch (err: any) {
-        setError(`Error fetching hotel: ${err.message}`);
+        console.log(`Error fetching hotel: ${err.message}`);
       }
     };
     fetchHotel();
@@ -37,8 +37,9 @@ const AddRoom = () => {
       showToast({ message: "Room Saved!", type: "SUCCESS" });
     },
     onError: (error: unknown) => {
-      // showToast({ message: "Error Saving Room", type: "ERROR" });
-      showToast({ message: error.message, type: "ERROR" });
+      const errorMessage =
+        (error as { message?: string })?.message || "Error Add Room"; // Fallback cho thông báo lỗi
+      showToast({ message: errorMessage, type: "ERROR" });
     },
   });
 

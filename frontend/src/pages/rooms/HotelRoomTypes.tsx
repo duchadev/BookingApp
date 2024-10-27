@@ -13,7 +13,7 @@ import { Dialog } from "primereact/dialog";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
 import { ProgressSpinner } from "primereact/progressspinner";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+import { HotelType } from "../../../../backend/src/shared/types";
 
 // Define Room interface
 interface Room {
@@ -46,13 +46,13 @@ export const HotelRoomTypes = () => {
   };
   const navigate = useNavigate();
   const { hotelId } = useParams();
-  const [hotel, setHotel] = useState(null);
+  const [hotel, setHotel] = useState<HotelType | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const toast = useRef(null);
+  const toast = useRef<Toast | null>(null);
   const dt = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
   const [roomTypes, setRoomTypes] = useState<Room[]>([]);
-  const [room, setRoom] = useState(emptyRoom);
+  const room = emptyRoom;
   // Delete room
   const [deleteRoomsDialog, setDeleteRoomsDialog] = useState(false);
   const [roomTypeToDelete, setRoomTypeToDelete] = useState<string | null>(null);
@@ -80,20 +80,23 @@ export const HotelRoomTypes = () => {
   // Fetch rooms from backend
   const fetchRooms = async () => {
     try {
-      const { data } = await axios.get("http://localhost:7000/api/rooms", {
-        params: { hotelId },
-      });
+      const { data }: { data: Room[] } = await axios.get(
+        "http://localhost:7000/api/rooms",
+        {
+          params: { hotelId },
+        }
+      );
 
       // Group rooms by type
-      const roomsByType: Room[] = data.reduce((acc, room: Room) => {
+      const roomsByType = data.reduce<Record<string, Room>>((acc, room) => {
         const { type } = room;
         if (!acc[type]) {
           acc[type] = { ...room, count: 1 }; // Initialize with count 1
         } else {
-          acc[type].count += 1; // Increment count
+          acc[type].count! += 1; // Increment count
         }
         return acc;
-      }, {});
+      }, {} as Record<string, Room>); // Đảm bảo acc được khởi tạo với đúng kiểu
 
       // Convert the grouped object into an array to make it compatible with the DataTable.
       const roomsGroupedByType = Object.values(roomsByType);
@@ -281,7 +284,9 @@ export const HotelRoomTypes = () => {
           <InputText
             type="search"
             className="w-full"
-            onInput={(e) => setGlobalFilter(e.target.value)}
+            onInput={(e) =>
+              setGlobalFilter((e.target as HTMLInputElement).value)
+            }
             placeholder="Search..."
           />
         </div>

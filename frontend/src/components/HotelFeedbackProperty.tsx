@@ -7,7 +7,7 @@ import { Rating } from "primereact/rating";
 import { Avatar } from "primereact/avatar"; // Import Avatar component for user profile picture
 import { ProgressSpinner } from "primereact/progressspinner"; // Spinner for loading state
 
-const HotelFeedBackProperty: React.FC<{ hotelId: string }> = ({ hotelId }) => {
+const HotelFeedBackProperty: React.FC<{ hotelId?: string }> = ({ hotelId }) => {
   const [feedbacks, setFeedbacks] = useState<FeedbackType[]>([]);
   const [loading, setLoading] = useState(true);
 

@@ -7,7 +7,7 @@ import { fetchFeedbackByHotel } from "../api-client";
 import { ProgressSpinner } from "primereact/progressspinner";
 
 interface FeedbackProps {
-  hotelId: string;
+  hotelId?: string;
 }
 
 const FeedbackProperties: React.FC<FeedbackProps> = ({ hotelId }) => {

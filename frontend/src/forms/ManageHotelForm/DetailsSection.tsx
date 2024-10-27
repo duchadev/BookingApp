@@ -19,12 +19,12 @@ const DetailsSection = () => {
 
   const canShowMapButton = name && city && country;
 
-  const handleTurnOnMap = (e) => {
+  const handleTurnOnMap = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     searchLocation(); // Call searchLocation when the button is clicked
     setShowMap(true);
   };
-  const handleTurnOffMap = (e) => {
+  const handleTurnOffMap = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setShowMap(false);
   };

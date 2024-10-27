@@ -4,9 +4,10 @@ import BookingItem from "../components/BookingItem";
 import { BookingType } from "../../../backend/src/shared/types";
 
 const MyBookings = () => {
-  const { data: myBookings, isLoading } = useQuery<BookingType[] | undefined>(
+  const { data: myBookings, refetch } = useQuery<BookingType[] | undefined>(
     "fetchMyBookings",
     apiClient.fetchMyBookings
+    // queryClient.invalidateQueries("rooms");
   );
 
   if (!myBookings || myBookings.length === 0) {
@@ -40,6 +41,7 @@ const MyBookings = () => {
               dates={formattedDates}
               price={booking.totalCost}
               status={booking.status}
+              refetchBookings={refetch}
             />
           </div>
         );
