@@ -1,5 +1,6 @@
 import { RegisterFormData } from "./pages/Register";
 import { SignInFormData } from "./pages/SignIn";
+import axios from 'axios';
 import {
   HotelSearchResponse,
   HotelType,
@@ -9,7 +10,9 @@ import {
 } from "../../backend/src/shared/types";
 import { BookingFormData } from "./forms/BookingForm/BookingForm";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
-
+interface UpdateHotelStatusData {
+  action: 'approve' | 'reject'; // Restrict action to only 'approve' or 'reject'
+}
 export const fetchCurrentUser = async (): Promise<UserType> => {
   const response = await fetch(`${API_BASE_URL}/api/users/me`, {
     credentials: "include",
@@ -401,3 +404,62 @@ export const fetchTop5Feedback = async (hotelId: string) => {
   console.log(response);
   return response.json();
 };
+export const fetchBookings = async () => {
+  const response = await fetch(`${API_BASE_URL}/api/bookings`, {
+      credentials: "include",
+  });
+  if (!response.ok) {
+      throw new Error("Error fetching bookings");
+  }
+  return response.json();  
+};
+
+export const getHotels = async (verifyStatus?: string) => {
+  const url = verifyStatus 
+    ? `${API_BASE_URL}/api/admin/verify?verify=${verifyStatus}` 
+    : `${API_BASE_URL}/api/admin/verify`;
+
+  const response = await fetch(url, {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch hotels");
+  }
+
+  const data = await response.json();
+  console.log("Fetched Hotels:", data); // Debugging response structure
+  return data;
+};
+// Make sure this function exists in api-client.js
+export const updateHotelStatus = async (hotelId: string, data: UpdateHotelStatusData) => {
+  const response = await fetch(`${API_BASE_URL}/api/admin/${hotelId}/verify`, {
+      method: 'PATCH',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+      credentials: 'include' // This ensures cookies are sent with the request
+  });
+
+  // Log the response status and body for debugging
+  console.log("Response status:", response.status);
+  
+  // Attempt to parse the response as JSON
+  let responseData;
+  try {
+      responseData = await response.json();
+      console.log("Response data:", responseData);
+  } catch (err) {
+      console.error("Failed to parse JSON response", err);
+      throw new Error('Failed to parse response data');
+  }
+
+  // Check if the response is okay
+  if (!response.ok) {
+      throw new Error(`Failed to update hotel status: ${responseData.message || response.statusText}`);
+  }
+
+  return responseData; // Return the parsed response data if needed
+};
+

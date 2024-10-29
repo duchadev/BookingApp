@@ -24,6 +24,7 @@
     "jquery": "^3.7.1",
     "leaflet": "^1.9.4",
     "leaflet-control-geocoder": "^2.4.0",
+    "lucide-react": "^0.453.0",
     "owl.carousel": "^2.3.4",
     "primeicons": "^7.0.0",
     "primereact": "^10.8.3",
@@ -35,7 +36,8 @@
     "react-icons": "^4.12.0",
     "react-leaflet": "^4.2.1",
     "react-query": "^3.39.3",
-    "react-router-dom": "^6.18.0"
+    "react-router-dom": "^6.18.0",
+    "recharts": "^2.13.0"
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.12",
