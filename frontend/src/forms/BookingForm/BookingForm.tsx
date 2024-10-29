@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { UserType } from "../../../../backend/src/shared/types";
+import { UserType } from "../../../src/shared/types";
 import { useSearchContext } from "../../contexts/SearchContext";
 import { useParams } from "react-router-dom";
 import * as apiClient from "../../api-client";

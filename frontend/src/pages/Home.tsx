@@ -4,7 +4,7 @@ import "../assets/css/home.css";
 import Featured from "../components/Featured";
 import PropertyList from "../components/PropertyList";
 import FeaturedProperties from "../components/FeaturedProperties";
-import { HotelType } from "../../../backend/src/shared/types";
+import { HotelType } from "../../src/shared/types";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import BookingSuccessEmail from "../components/BookingSuccessEmail";

@@ -12,8 +12,9 @@ import "../assets/css/demo.css";
 import BookingTable from "../components/BookingTable";
 import FeedbackComponent from "../../src/components/FeedbackComponent";
 import FeedbackProperties from "../components/FeedbackProperties";
-import { RoomType } from "../../../backend/src/shared/types";
+import { RoomType } from "../../src/shared/types";
 import HotelFeedBackProperty from "../components/HotelFeedbackProperty";
+const VITE_FRONTEND_BASE_URL = import.meta.env.VITE_FRONTEND_BASE_URL;
 
 interface Item {
   thumbnailImageSrc: string;
@@ -163,7 +164,7 @@ const Detail = () => {
       label: hotel?.name,
       template: () => (
         <>
-          <Link to={`http://localhost:5174/detail/${hotel?._id}`}>
+          <Link to={`${VITE_FRONTEND_BASE_URL}/detail/${hotel?._id}`}>
             <a className="text-primary font-semibold text-blue-600">
               {hotel?.name}
             </a>
@@ -172,7 +173,10 @@ const Detail = () => {
       ),
     },
   ];
-  const home: MenuItem = { icon: "pi pi-home", url: "http://localhost:5174/" };
+  const home: MenuItem = {
+    icon: "pi pi-home",
+    url: `${VITE_FRONTEND_BASE_URL}`,
+  };
 
   return (
     <>

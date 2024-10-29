@@ -1,5 +1,5 @@
 import { Skeleton } from "primereact/skeleton";
-import { HotelType } from "../../../backend/src/shared/types";
+import { HotelType } from "../../src/shared/types";
 import "../assets/css/propertyList.css";
 
 // Define the props type

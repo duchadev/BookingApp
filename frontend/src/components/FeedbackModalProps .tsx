@@ -1,6 +1,6 @@
-import React from 'react';
-import { Dialog } from 'primereact/dialog';
-import { FeedbackType } from "../../../backend/src/shared/types"; // Adjust the path as necessary
+import React from "react";
+import { Dialog } from "primereact/dialog";
+import { FeedbackType } from "../../src/shared/types"; // Adjust the path as necessary
 import { Rating } from "primereact/rating";
 interface FeedbackModalProps {
   visible: boolean;
@@ -8,22 +8,33 @@ interface FeedbackModalProps {
   onHide: () => void;
 }
 
-const FeedbackModal: React.FC<FeedbackModalProps> = ({ visible, feedback, onHide }) => {
+const FeedbackModal: React.FC<FeedbackModalProps> = ({
+  visible,
+  feedback,
+  onHide,
+}) => {
   const footer = (
     <div>
-      <button onClick={onHide} className="p-button-text">Close</button>
+      <button onClick={onHide} className="p-button-text">
+        Close
+      </button>
     </div>
   );
 
   return (
-    <Dialog header="Feedback Details" visible={visible} footer={footer} onHide={onHide}>
+    <Dialog
+      header="Feedback Details"
+      visible={visible}
+      footer={footer}
+      onHide={onHide}
+    >
       {feedback && (
         <div>
           <h4>{`${feedback.userId.firstName} ${feedback.userId.lastName}`}</h4>
           <p>Hotel: {feedback.hotelId.name}</p>
           <div className=" flex justify-content-center">
             <Rating value={feedback.rating} readOnly cancel={false} />
-        </div>
+          </div>
           <p>Comment: {feedback.comment}</p>
         </div>
       )}

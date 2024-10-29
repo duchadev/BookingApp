@@ -15,7 +15,10 @@ import { Dialog } from "primereact/dialog";
 import { deleteRoomById } from "../../api-client";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
-import { HotelType } from "../../../../backend/src/shared/types";
+import { HotelType } from "../../../src/shared/types";
+
+const VITE_FRONTEND_BASE_URL = import.meta.env.VITE_FRONTEND_BASE_URL;
+const VITE_BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
 // Define Room interface
 interface Room {
@@ -76,7 +79,7 @@ export const HotelRoomTypeDetails = () => {
     const fetchHotel = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:7000/api/hotels/${hotelId}`,
+          `${VITE_BACKEND_BASE_URL}/api/hotels/${hotelId}`,
           {
             params: { hotelId },
           }
@@ -93,7 +96,7 @@ export const HotelRoomTypeDetails = () => {
   const fetchRooms = async () => {
     try {
       const { data } = await axios.get(
-        `http://localhost:7000/api/rooms/type/${roomType}`,
+        `${VITE_BACKEND_BASE_URL}/api/rooms/type/${roomType}`,
         {
           params: { hotelId },
         }
@@ -179,7 +182,7 @@ export const HotelRoomTypeDetails = () => {
       label: hotel?.name,
       template: () => (
         <>
-          <Link to={`http://localhost:5174/my-hotels`}>
+          <Link to={`${VITE_FRONTEND_BASE_URL}/my-hotels`}>
             <a className="text-primary">My Hotels</a>
           </Link>
         </>
@@ -189,7 +192,7 @@ export const HotelRoomTypeDetails = () => {
       label: hotel?.name,
       template: () => (
         <>
-          <Link to={`http://localhost:5174/detail/${hotel?._id}`}>
+          <Link to={`${VITE_FRONTEND_BASE_URL}/detail/${hotel?._id}`}>
             <a className="text-primary">{hotel?.name}</a>
           </Link>
         </>
@@ -199,7 +202,9 @@ export const HotelRoomTypeDetails = () => {
       label: "Rooms",
       template: () => (
         <>
-          <Link to={`http://localhost:5174/hotel/${hotel?._id}/rooms/types`}>
+          <Link
+            to={`${VITE_FRONTEND_BASE_URL}/hotel/${hotel?._id}/rooms/types`}
+          >
             <a className="text-primary">Rooms</a>
           </Link>
         </>
@@ -215,7 +220,10 @@ export const HotelRoomTypeDetails = () => {
     },
   ];
 
-  const home: MenuItem = { icon: "pi pi-home", url: "http://localhost:5174/" };
+  const home: MenuItem = {
+    icon: "pi pi-home",
+    url: `${VITE_FRONTEND_BASE_URL}`,
+  };
 
   const openNew = () => {
     // hoặc dùng thẻ Link thay vì button và dùng event của hàm này

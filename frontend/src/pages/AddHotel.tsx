@@ -4,6 +4,7 @@ import { useAppContext } from "../contexts/AppContext";
 import * as apiClient from "../api-client";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { MenuItem } from "primereact/menuitem";
+const VITE_FRONTEND_BASE_URL = import.meta.env.VITE_FRONTEND_BASE_URL;
 
 const AddHotel = () => {
   const { showToast } = useAppContext();
@@ -32,7 +33,10 @@ const AddHotel = () => {
       ),
     },
   ];
-  const home: MenuItem = { icon: "pi pi-home", url: "http://localhost:5174/" };
+  const home: MenuItem = {
+    icon: "pi pi-home",
+    url: `${VITE_FRONTEND_BASE_URL}`,
+  };
 
   return (
     <>

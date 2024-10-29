@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import Hotel from "../models/Hotel";
+import Hotel from "../models/hotel";
 import { verifyToken, authorizeRoles } from "../middleware/auth";
 import { body } from "express-validator";
 import { HotelType } from "../shared/types";

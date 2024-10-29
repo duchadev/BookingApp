@@ -5,6 +5,7 @@ import { Button } from "primereact/button";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import "../assets/css/table.css";
+const VITE_BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
 // Định nghĩa kiểu dữ liệu cho phòng
 interface Room {
@@ -32,7 +33,7 @@ const BookingTable = () => {
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const response = await axios.get("http://localhost:7000/api/rooms", {
+        const response = await axios.get(`${VITE_BACKEND_BASE_URL}/api/rooms`, {
           params: { hotelId },
         });
 
@@ -78,7 +79,7 @@ const BookingTable = () => {
       <h1 className="text-2xl font-bold">Availability</h1>
       <div className="container my-2 p-4 bg-light rounded">
         {rooms.length === 0 ? (
-          <p className="text-center">Không có phòng nào được tìm thấy.</p>
+          <p className="text-center">This hotel has not available rooms.</p>
         ) : (
           <Table bordered hover responsive>
             <thead className="bg-blue-custom text-white">

@@ -163,7 +163,7 @@ roomRoutes.put(
 
     try {
       const { roomNumber } = req.body;
-
+      console.log("req.files: ", req.files);
       // Check if the room exists
       const existingRoom = await Room.findById(req.params.roomId);
       if (!existingRoom) {
@@ -182,12 +182,31 @@ roomRoutes.put(
         }
       }
 
-      // Model.findByIdAndUpdate(id, update, options)
+      // Process image files and get URLs
+      let imageUrls: string[] = existingRoom.imageUrls || [];
+      const imageFiles = req.files as Express.Multer.File[];
+
+      if (imageFiles && imageFiles.length > 0) {
+        // Assuming `uploadImages` function processes and returns URLs for each image
+        imageUrls = await uploadImages(imageFiles); // cập nhật các hình ảnh mà người dùng đã tải lên
+        // Assuming `uploadImages` function processes and returns URLs for each image
+        // const newImageUrls = await uploadImages(imageFiles);
+        // imageUrls = [...imageUrls, ...newImageUrls]; // thêm liên tục vào danh sách imageUrls
+      }
+
+      // Prepare data to update
+      const updatedData = {
+        ...req.body,
+        imageUrls,
+      };
+
+      // Update room in the database
       const updatedRoom = await Room.findByIdAndUpdate(
         req.params.roomId,
-        req.body,
+        updatedData,
         { new: true }
       );
+
       if (!updatedRoom) {
         return res.status(404).json({ message: "Room not found" });
       }

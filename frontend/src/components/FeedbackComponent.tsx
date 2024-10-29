@@ -7,7 +7,7 @@ import { Rating } from "primereact/rating";
 import * as apiClient from "../api-client";
 import { useQuery, useMutation } from "react-query";
 import { useNavigate } from "react-router-dom"; // Assuming you're using react-router-dom for navigation
-import { HotelType } from "../../../backend/src/shared/types";
+import { HotelType } from "../../src/shared/types";
 
 interface ApiError {
   errorData?: {

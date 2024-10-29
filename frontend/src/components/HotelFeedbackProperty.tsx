@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Carousel, CarouselResponsiveOption } from "primereact/carousel";
-import { FeedbackType } from "../../../backend/src/shared/types"; // Import the FeedbackType
+import { FeedbackType } from "../../src/shared/types"; // Import the FeedbackType
 import { fetchFeedbackByHotel, fetchTop5Feedback } from "../api-client";
 import "../assets/css/featuredProperties.css";
 import { Rating } from "primereact/rating";

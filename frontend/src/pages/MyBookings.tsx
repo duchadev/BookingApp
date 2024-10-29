@@ -1,7 +1,7 @@
 import { useQuery } from "react-query";
 import * as apiClient from "../api-client";
 import BookingItem from "../components/BookingItem";
-import { BookingType } from "../../../backend/src/shared/types";
+import { BookingType } from "../../src/shared/types";
 
 const MyBookings = () => {
   const { data: myBookings, refetch } = useQuery<BookingType[] | undefined>(

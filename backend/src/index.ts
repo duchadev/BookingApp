@@ -14,6 +14,8 @@ import sendEmailRoutes from "./routes/sendEmailRoutes";
 import feedbackRoutes from "./routes/feedbackRoutes";
 import morgan from "morgan";
 
+const BACKEND_URL = process.env.BACKEND_BASE_URL;
+
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -49,5 +51,5 @@ app.use("/api/bookings", bookingRoutes);
 // app.use("/api/admin", adminRouter);
 
 app.listen(7000, () => {
-  console.log("server running on localhost:7000");
+  console.log(`server running on ${BACKEND_URL}`);
 });

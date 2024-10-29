@@ -1,12 +1,12 @@
 import express, { Request, Response } from "express";
-import User from "../models/User";
 import jwt from "jsonwebtoken";
 import { check, validationResult } from "express-validator";
 import { verifyToken } from "../middleware/auth";
 import * as crypto from "crypto";
 import { sendVerificationEmail } from "../helpers/sendEmail";
+import User from "../models/user";
 
-const FRONTEND_URL = process.env.FRONTEND_URL || "hthttp://localhost:5174t";
+const FRONTEND_URL = process.env.FRONTEND_URL;
 const usersRouter = express.Router();
 
 usersRouter.get("/me", verifyToken, async (req: Request, res: Response) => {

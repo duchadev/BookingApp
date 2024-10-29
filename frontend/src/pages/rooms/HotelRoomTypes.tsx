@@ -13,7 +13,10 @@ import { Dialog } from "primereact/dialog";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
 import { ProgressSpinner } from "primereact/progressspinner";
-import { HotelType } from "../../../../backend/src/shared/types";
+import { HotelType } from "../../../src/shared/types";
+
+const VITE_FRONTEND_BASE_URL = import.meta.env.VITE_FRONTEND_BASE_URL;
+const VITE_BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
 // Define Room interface
 interface Room {
@@ -64,7 +67,7 @@ export const HotelRoomTypes = () => {
     const fetchHotel = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:7000/api/hotels/${hotelId}`,
+          `${VITE_BACKEND_BASE_URL}/api/hotels/${hotelId}`,
           {
             params: { hotelId },
           }
@@ -81,7 +84,7 @@ export const HotelRoomTypes = () => {
   const fetchRooms = async () => {
     try {
       const { data }: { data: Room[] } = await axios.get(
-        "http://localhost:7000/api/rooms",
+        `${VITE_BACKEND_BASE_URL}/api/rooms`,
         {
           params: { hotelId },
         }
@@ -136,7 +139,7 @@ export const HotelRoomTypes = () => {
       label: hotel?.name,
       template: () => (
         <>
-          <Link to={`http://localhost:5174/my-hotels`}>
+          <Link to={`${VITE_FRONTEND_BASE_URL}/my-hotels`}>
             <a className="text-primary">My Hotels</a>
           </Link>
         </>
@@ -146,7 +149,7 @@ export const HotelRoomTypes = () => {
       label: hotel?.name,
       template: () => (
         <>
-          <Link to={`http://localhost:5174/detail/${hotel?._id}`}>
+          <Link to={`${VITE_FRONTEND_BASE_URL}/detail/${hotel?._id}`}>
             <a className="text-primary">{hotel?.name}</a>
           </Link>
         </>
@@ -156,7 +159,9 @@ export const HotelRoomTypes = () => {
       label: "Rooms",
       template: () => (
         <>
-          <Link to={`http://localhost:5174/hotel/${hotel?._id}/rooms/types`}>
+          <Link
+            to={`${VITE_FRONTEND_BASE_URL}/hotel/${hotel?._id}/rooms/types`}
+          >
             <a className="text-primary font-semibold text-blue-600">Rooms</a>
           </Link>
         </>
@@ -164,7 +169,10 @@ export const HotelRoomTypes = () => {
     },
   ];
 
-  const home: MenuItem = { icon: "pi pi-home", url: "http://localhost:5174/" };
+  const home: MenuItem = {
+    icon: "pi pi-home",
+    url: `${VITE_FRONTEND_BASE_URL}`,
+  };
 
   const openNew = () => {
     // hoặc dùng thẻ Link thay vì button và dùng event của hàm này
@@ -199,7 +207,7 @@ export const HotelRoomTypes = () => {
     try {
       // Call backend API to delete rooms of a specific type
       await axios.delete(
-        `http://localhost:7000/api/rooms/type/${roomTypeToDelete}`,
+        `${VITE_BACKEND_BASE_URL}/api/rooms/type/${roomTypeToDelete}`,
         {
           params: { hotelId },
           withCredentials: true, // Include credentials (cookies or tokens), giống credentials: "include" bên fetch API thông thường

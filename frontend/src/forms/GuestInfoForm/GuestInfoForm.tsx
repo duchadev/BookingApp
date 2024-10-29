@@ -14,8 +14,9 @@ import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import axios from "axios";
 import { Toast } from "primereact/toast";
-import { RoomType } from "../../../../backend/src/shared/types";
+import { RoomType } from "../../../src/shared/types";
 import { ConfirmDialog } from "primereact/confirmdialog";
+const VITE_BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
 type Props = {
   hotelId?: string;
@@ -49,7 +50,7 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
   // Fetch rooms from backend
   const fetchRooms = async () => {
     try {
-      const { data } = await axios.get("http://localhost:7000/api/rooms", {
+      const { data } = await axios.get(`${VITE_BACKEND_BASE_URL}/api/rooms`, {
         params: { hotelId },
       });
       const availableRooms = data.filter(
@@ -126,7 +127,7 @@ const GuestInfoForm = ({ hotelId, pricePerNight }: Props) => {
   const checkRoomAvailability = async () => {
     try {
       const { data } = await axios.post(
-        "http://localhost:7000/api/bookings/check-room-availability",
+        `${VITE_BACKEND_BASE_URL}/api/bookings/check-room-availability`,
         {
           roomId: room?._id,
           checkIn,

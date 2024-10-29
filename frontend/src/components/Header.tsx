@@ -8,11 +8,11 @@ const Header = () => {
   // const { isLoggedIn } = useAppContext();
 
   return (
-    <div className="bg-blue-800 py-6">
+    <div className="bg-blue-500 py-6">
       <Fchat />
       <div className="container mx-auto flex justify-between">
         <span className="text-5xl text-white font-bold tracking-tight">
-          <Link to="/">HotelHaven</Link>
+          <Link to="/">Hotel Haven</Link>
         </span>
         <span className="flex space-x-2">
           {isLoggedIn ? (

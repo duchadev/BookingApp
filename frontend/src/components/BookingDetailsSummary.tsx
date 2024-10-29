@@ -1,9 +1,5 @@
 import { ConfirmPopup } from "primereact/confirmpopup";
-import {
-  HotelType,
-  RoomType,
-  UserType,
-} from "../../../backend/src/shared/types";
+import { HotelType, RoomType, UserType } from "../../src/shared/types";
 import { useRef, useState } from "react";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
@@ -192,8 +188,8 @@ const BookingDetailsSummary = ({
         icon="pi pi-exclamation-triangle"
         acceptLabel="Online"
         rejectLabel="Offline"
-        acceptClassName="ml-1 px-2 py-1 bg-blue-500 text-white flex justify-content-center rounded hover:bg-blue-700"
-        rejectClassName="px-2 py-1 text-blue-500 flex justify-content-center rounded hover:bg-gray-100"
+        acceptClassName="ml-1 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-700"
+        rejectClassName="px-2 py-1 text-blue-500 rounded hover:bg-gray-100"
         accept={() => accept("online")}
         reject={() => accept("offline")}
       />

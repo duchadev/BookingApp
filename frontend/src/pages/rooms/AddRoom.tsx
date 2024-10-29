@@ -7,7 +7,10 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import ManageRoomForm from "../../forms/ManageRoomForm/ManageRoomForm";
-import { HotelType } from "../../../../backend/src/shared/types";
+import { HotelType } from "../../../src/shared/types";
+
+const VITE_FRONTEND_BASE_URL = import.meta.env.VITE_FRONTEND_BASE_URL;
+const VITE_BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
 const AddRoom = () => {
   const { showToast } = useAppContext();
@@ -19,7 +22,7 @@ const AddRoom = () => {
     const fetchHotel = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:7000/api/hotels/${hotelId}`,
+          `${VITE_BACKEND_BASE_URL}/api/hotels/${hotelId}`,
           {
             params: { hotelId },
           }
@@ -52,7 +55,10 @@ const AddRoom = () => {
       label: "My Hotels",
       template: () => (
         <>
-          <a href="http://localhost:5174/my-hotels" className="text-primary">
+          <a
+            href={`${VITE_FRONTEND_BASE_URL}/my-hotels`}
+            className="text-primary"
+          >
             My Hotels
           </a>
         </>
@@ -62,7 +68,10 @@ const AddRoom = () => {
       label: hotel?.name,
       template: () => (
         <>
-          <Link to="http://localhost:5174/my-hotels" className="text-primary">
+          <Link
+            to={`${VITE_FRONTEND_BASE_URL}/my-hotels`}
+            className="text-primary"
+          >
             {hotel?.name}
           </Link>
         </>
@@ -72,7 +81,9 @@ const AddRoom = () => {
       label: "Rooms",
       template: () => (
         <>
-          <Link to={`http://localhost:5174/hotel/${hotel?._id}/rooms/types`}>
+          <Link
+            to={`${VITE_FRONTEND_BASE_URL}/hotel/${hotel?._id}/rooms/types`}
+          >
             <a className="text-primary">Rooms</a>
           </Link>
         </>
@@ -87,7 +98,10 @@ const AddRoom = () => {
       ),
     },
   ];
-  const home: MenuItem = { icon: "pi pi-home", url: "http://localhost:5174/" };
+  const home: MenuItem = {
+    icon: "pi pi-home",
+    url: `${VITE_FRONTEND_BASE_URL}`,
+  };
 
   return (
     <>

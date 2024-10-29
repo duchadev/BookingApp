@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import Feedback from "../models/feedback";
-import Hotel from "../models/Hotel";
-import User from "../models/User";
+import Hotel from "../models/hotel";
+import User from "../models/user";
 import { verifyToken } from "../middleware/auth";
 import Booking from "../models/Booking";
 const feedbackRoutes = express.Router();

@@ -1,6 +1,6 @@
 import { Carousel, CarouselResponsiveOption } from "primereact/carousel";
 import "../assets/css/featuredProperties.css";
-import { HotelType } from "../../../backend/src/shared/types";
+import { HotelType } from "../../src/shared/types";
 import { Link } from "react-router-dom";
 
 // Define the props type

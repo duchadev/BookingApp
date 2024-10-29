@@ -1,6 +1,6 @@
 import { FormProvider, useForm } from "react-hook-form";
 
-import { RoomType } from "../../../../backend/src/shared/types";
+import { RoomType } from "../../../src/shared/types";
 import { useEffect } from "react";
 import DetailsSection from "./DetailsSection";
 // import { ObjectId } from "mongoose";

@@ -2,7 +2,7 @@ import express from "express";
 import nodemailer from "nodemailer";
 // import { RegisterSuccessEmail } from "./RegisterSuccessEmail";
 
-const BACKEND_URL = process.env.BACKEND_BASE_URL || "http://localhost:7000";
+const BACKEND_URL = process.env.BACKEND_BASE_URL;
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
