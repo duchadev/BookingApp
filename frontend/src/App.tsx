@@ -28,6 +28,7 @@ import EditRoom from "./pages/rooms/EditRoom";
 import { HotelRoomTypeDetails } from "./pages/rooms/HotelRoomTypeDetails";
 import Dashboard from "./pages/Dashboard";
 import ManageHotels from "./pages/ManageHotels";
+import ManageUserReq from "./pages/ManageUserReq";
 const App = () => {
   return (
     <Router>
@@ -64,7 +65,7 @@ const App = () => {
         <Route
           path="/hotel/:hotelId/booking"
           element={
-            <ProtectedRoute roles={["user", "admin"]}>
+            <ProtectedRoute roles={["user", "hotel_manager", "admin"]}>
               <Layout>
                 <Booking />
               </Layout>
@@ -144,7 +145,7 @@ const App = () => {
         <Route
           path="/my-bookings"
           element={
-            <ProtectedRoute roles={["user", "admin"]}>
+            <ProtectedRoute roles={["user", "hotel_manager", "admin"]}>
               <Layout>
                 <MyBookings />
               </Layout>
@@ -165,6 +166,14 @@ const App = () => {
           element={
             <ProtectedRoute roles={["admin"]}>
                 <ManageHotels />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/verifyUserRequest"
+          element={
+            <ProtectedRoute roles={["admin"]}>
+                <ManageUserReq />
             </ProtectedRoute>
           }
         />

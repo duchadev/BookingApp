@@ -1,5 +1,5 @@
 import { Skeleton } from "primereact/skeleton";
-import { HotelType } from "../../../backend/src/shared/types";
+import { HotelType } from "../../src/shared/types";
 import "../assets/css/propertyList.css";
 
 // Define the props type
@@ -30,7 +30,6 @@ const PropertyList: React.FC<FeaturedProps> = ({ hotels, isLoading }) => {
     (hotel) => hotel.type === "Resort"
   ).length;
   const villasCount = hotels?.filter((hotel) => hotel.type === "Villa").length;
-  const cabinsCount = hotels?.filter((hotel) => hotel.type === "Cabin").length;
 
   return (
     <div className="pList pl-8">

@@ -3,6 +3,12 @@ import { RoomFormData } from "./ManageRoomForm";
 import { useState, useEffect } from "react";
 import { roomFacilities } from "../../config/room-options-config";
 
+const typeOptions = {
+  Single: "Single - 👤 x 1",
+  Double: "Double - 👤 x 2",
+  Suite: "Suite - 👤 x 3",
+};
+
 const DetailsSection = () => {
   const {
     register,
@@ -14,6 +20,24 @@ const DetailsSection = () => {
 
   const existingImageUrls = watch("imageUrls");
   const existingFacilities = watch("facilities") || []; // Nếu không có giá trị thì khởi tạo là một mảng rỗng
+  // Theo dõi thay đổi của type và tự động cập nhật capacity
+  const roomType = watch("type");
+
+  useEffect(() => {
+    switch (roomType) {
+      case "Single":
+        setValue("capacity", 1);
+        break;
+      case "Double":
+        setValue("capacity", 2);
+        break;
+      case "Suite":
+        setValue("capacity", 3);
+        break;
+      default:
+        setValue("capacity", 0); // Giá trị mặc định nếu không chọn gì
+    }
+  }, [roomType, setValue]);
 
   const handleDelete = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -68,6 +92,7 @@ const DetailsSection = () => {
             <span className="text-red-500">{errors.roomNumber.message}</span>
           )}
         </label>
+        {/* Room Type */}
         <label className="text-gray-700 text-sm font-bold max-w-[50%]">
           Type
           <select
@@ -75,27 +100,33 @@ const DetailsSection = () => {
               required: "This field is required",
             })}
             className="border rounded w-full p-2 text-gray-700 font-normal"
+            onChange={(e) => setValue("type", e.target.value)}
           >
             <option value="" className="text-sm font-bold">
-              Select as type
+              Select a type
             </option>
-            {["Single", "Double", "Suite"].map((num) => (
-              <option value={num}>{num}</option>
+            {Object.entries(typeOptions).map(([value, displayText]) => (
+              <option key={value} value={value}>
+                {displayText}
+              </option>
             ))}
           </select>
           {errors.type && (
             <span className="text-red-500">{errors.type.message}</span>
           )}
         </label>
-        <label className="text-gray-700 text-sm font-bold max-w-[50%]">
+
+        {/* Capacity sẽ tự động cập nhật dựa trên type */}
+        <label className=" text-gray-700 text-sm font-bold max-w-[50%]">
           Capacity
           <input
             type="number"
             min={1}
-            className="border rounded w-full py-1 px-2 font-normal"
+            className="bg-gray-200 border rounded w-full py-1 px-2 font-normal"
             {...register("capacity", {
               required: "This field is required",
             })}
+            readOnly
           ></input>
           {errors.capacity && (
             <span className="text-red-500">{errors.capacity.message}</span>
@@ -232,7 +263,6 @@ const DetailsSection = () => {
           </span>
         )}
       </div>
-
       <h2 className="text-2xl font-bold">Images</h2>
       <div className="border rounded p-4 flex flex-col gap-4">
         {existingImageUrls && (

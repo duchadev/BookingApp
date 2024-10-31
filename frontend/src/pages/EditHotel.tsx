@@ -5,6 +5,7 @@ import ManageHotelForm from "../forms/ManageHotelForm/ManageHotelForm";
 import { useAppContext } from "../contexts/AppContext";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { MenuItem } from "primereact/menuitem";
+const VITE_FRONTEND_BASE_URL = import.meta.env.VITE_FRONTEND_BASE_URL;
 
 const EditHotel = () => {
   const { hotelId } = useParams();
@@ -36,7 +37,10 @@ const EditHotel = () => {
       label: "My Hotels",
       template: () => (
         <>
-          <a href="http://localhost:5174/my-hotels" className="text-primary">
+          <a
+            href={`${VITE_FRONTEND_BASE_URL}/my-hotels`}
+            className="text-primary"
+          >
             My Hotels
           </a>
         </>
@@ -46,7 +50,10 @@ const EditHotel = () => {
       label: hotel?.name,
       template: () => (
         <>
-          <a href="http://localhost:5174/my-hotels" className="text-primary">
+          <a
+            href={`${VITE_FRONTEND_BASE_URL}/my-hotels`}
+            className="text-primary"
+          >
             {hotel?.name}
           </a>
         </>
@@ -61,7 +68,10 @@ const EditHotel = () => {
       ),
     },
   ];
-  const home: MenuItem = { icon: "pi pi-home", url: "http://localhost:5174/" };
+  const home: MenuItem = {
+    icon: "pi pi-home",
+    url: `${VITE_FRONTEND_BASE_URL}`,
+  };
 
   return (
     <>

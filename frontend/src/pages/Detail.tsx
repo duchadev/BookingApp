@@ -11,14 +11,26 @@ import MapComponent from "./MapComponent";
 import "../assets/css/demo.css";
 import BookingTable from "../components/BookingTable";
 import FeedbackComponent from "../../src/components/FeedbackComponent";
-import { Button } from 'primereact/button';
 import FeedbackProperties from "../components/FeedbackProperties";
-import HotelFeedBackProperty from "../components/HotelFeedBackProperty";
+import { RoomType } from "../../src/shared/types";
+import HotelFeedBackProperty from "../components/HotelFeedbackProperty";
+const VITE_FRONTEND_BASE_URL = import.meta.env.VITE_FRONTEND_BASE_URL;
+
+interface Item {
+  thumbnailImageSrc: string;
+  alt: string;
+  itemImageSrc: string;
+}
+interface CustomImageData {
+  itemImageSrc: string;
+  thumbnailImageSrc: string;
+  alt: string;
+}
 
 const Detail = () => {
   const { hotelId } = useParams();
-  const [images, setImages] = useState([]); // Thay đổi giá trị khởi tạo thành mảng rỗng
-  const menu = useRef(null);
+  const [images, setImages] = useState<CustomImageData[]>([]); // Thay đổi giá trị khởi tạo thành mảng rỗng
+  const menu = useRef<TieredMenu | null>(null);
   const [mapPosition, setMapPosition] = useState<[number, number] | null>(null);
   const [minPrice, setMinPrice] = useState(0);
 
@@ -34,17 +46,7 @@ const Detail = () => {
       enabled: !!hotelId,
     }
   );
-const { data: feedbacks, isLoading: feedbacksLoading, isError: feedbacksError } = useQuery(
-  "fetchFeedbacks",
-  () => apiClient.fetchFeedbacks()
-  );
-  const { data: feedbacksByHotel } = useQuery(
-  "fetchRoomsByHotelId",
-    () => apiClient.fetchRoomsByHotelId(hotelId || ""),
-    {
-      enabled: !!hotelId,
-    }
-);
+
   const { data: rooms } = useQuery(
     "fetchRoomsByHotelId",
     () => apiClient.fetchRoomsByHotelId(hotelId || ""),
@@ -57,7 +59,7 @@ const { data: feedbacks, isLoading: feedbacksLoading, isError: feedbacksError } 
   useEffect(() => {
     if (hotel) {
       setImages(
-        hotel?.imageUrls.map((url) => ({
+        hotel.imageUrls.map((url: string) => ({
           itemImageSrc: url,
           thumbnailImageSrc: url, // Có thể thay đổi thumbnail nếu cần
           alt: hotel.name,
@@ -65,8 +67,8 @@ const { data: feedbacks, isLoading: feedbacksLoading, isError: feedbacksError } 
       );
 
       // Extract minPrice from roomPrices if it exists
-      if (rooms && rooms.length > 0) {
-        const prices = rooms.map((room) => room.pricePerNight);
+      if (rooms && rooms?.length > 0) {
+        const prices = rooms.map((room: RoomType) => room.pricePerNight);
         const minRoomPrice = Math.min(...prices);
         setMinPrice(minRoomPrice);
       }
@@ -113,7 +115,7 @@ const { data: feedbacks, isLoading: feedbacksLoading, isError: feedbacksError } 
     },
   ];
 
-  const itemTemplate = (item) => {
+  const itemTemplate = (item: Item) => {
     return (
       <img
         src={item.itemImageSrc}
@@ -123,7 +125,7 @@ const { data: feedbacks, isLoading: feedbacksLoading, isError: feedbacksError } 
     );
   };
 
-  const thumbnailTemplate = (item) => {
+  const thumbnailTemplate = (item: Item) => {
     return (
       <img
         src={item.thumbnailImageSrc}
@@ -147,18 +149,10 @@ const { data: feedbacks, isLoading: feedbacksLoading, isError: feedbacksError } 
 
   const items2 = [
     {
-      label: (
-        <>
-          <h2 className="font-bold">Share this property</h2>
-        </>
-      ),
+      label: "Share this property", // Chỉ dùng string
     },
     {
-      label: (
-        <>
-          <p>Copy link</p>
-        </>
-      ),
+      label: "Copy link", // Chỉ dùng string
       icon: "pi pi-clipboard",
       command: () => copyLink(),
     },
@@ -170,7 +164,7 @@ const { data: feedbacks, isLoading: feedbacksLoading, isError: feedbacksError } 
       label: hotel?.name,
       template: () => (
         <>
-          <Link to={`http://localhost:5174/detail/${hotel?._id}`}>
+          <Link to={`${VITE_FRONTEND_BASE_URL}/detail/${hotel?._id}`}>
             <a className="text-primary font-semibold text-blue-600">
               {hotel?.name}
             </a>
@@ -179,7 +173,10 @@ const { data: feedbacks, isLoading: feedbacksLoading, isError: feedbacksError } 
       ),
     },
   ];
-  const home: MenuItem = { icon: "pi pi-home", url: "http://localhost:5174/" };
+  const home: MenuItem = {
+    icon: "pi pi-home",
+    url: `${VITE_FRONTEND_BASE_URL}`,
+  };
 
   return (
     <>
@@ -189,25 +186,31 @@ const { data: feedbacks, isLoading: feedbacksLoading, isError: feedbacksError } 
         <div className="flex space-x-4">
           <div className="flex-1 ">
             <span className="flex items-center space-x-1">
-  {Array.from({ length: 5 }).map((_, index) => {
-    if (index < hotel.starRating) {
-      return (
-        <i
-          key={index}
-          className="pi pi-star-fill text-yellow-400"
-        ></i>
-      );
-    }
+              {hotel &&
+                Array.from({ length: 5 }).map((_, index) => {
+                  if (index < hotel.starRating) {
+                    return (
+                      <i
+                        key={index}
+                        className="pi pi-star-fill text-yellow-400"
+                      ></i>
+                    );
+                  }
 
-    return (
-      <i key={index} className="pi pi-star-fill text-gray-300"></i>
-    );
-  })}
-  <strong className="ml-2 text-yellow-600 font-bold text-lg flex items-center">
-    <i className="pi pi-crown mr-1 text-yellow-600"></i>
-    {hotel?.starRating}/5
-  </strong>
-</span>
+                  return (
+                    <i
+                      key={index}
+                      className="pi pi-star-fill text-gray-300"
+                    ></i>
+                  );
+                })}
+              {hotel && (
+                <strong className="ml-2 text-yellow-600 font-bold text-lg flex items-center">
+                  <i className="pi pi-crown mr-1 text-yellow-600"></i>
+                  {hotel.starRating}/5
+                </strong>
+              )}
+            </span>
             <h1 className="text-3xl font-bold">{hotel?.name}</h1>
             <i className="pi pi-map-marker" style={{ color: "blue" }}></i>{" "}
             {hotel?.address}, {hotel?.city}, {hotel?.country} -{" "}
@@ -224,26 +227,23 @@ const { data: feedbacks, isLoading: feedbacksLoading, isError: feedbacksError } 
               <span>No map available</span>
             )}
           </div>
-           <div className="flex flex-row items-center gap-6">
- <div className="flex ">
-            <TieredMenu model={items2} popup ref={menu} breakpoint="767px" />
-            <a
-              href=""
-              onClick={(e) => {
-                e.preventDefault();
-                menu.current.toggle(e);
-              }}
-            >
-              <i className="pi pi-share-alt text-blue-600 font-bold text-2xl"></i>
-            </a>
-             
-            
+          <div className="flex flex-row items-center gap-6">
+            <div className="flex ">
+              <TieredMenu model={items2} popup ref={menu} breakpoint="767px" />
+              <a
+                href=""
+                onClick={(e) => {
+                  e.preventDefault();
+                  menu?.current?.toggle(e);
+                }}
+              >
+                <i className="pi pi-share-alt text-blue-600 font-bold text-2xl"></i>
+              </a>
+            </div>
+            <div className="flex justify-content-center">
+              <FeedbackComponent hotel={hotel} />
+            </div>
           </div>
-          <div className="flex justify-content-center">
-            <FeedbackComponent />
-        </div>
-          </div>
-         
         </div>
 
         {/* Sử dụng flexbox để đưa Galleria và bản đồ vào cùng hàng */}
@@ -262,17 +262,14 @@ const { data: feedbacks, isLoading: feedbacksLoading, isError: feedbacksError } 
             />
           </div>
           <div className="flex-1 flex flex-col space-x-4">
-         
-              <div className="flex-1 justify-center" >
-            
-            <HotelFeedBackProperty hotelId={hotelId} />
-            
+            <div className="flex-1 justify-center">
+              <HotelFeedBackProperty hotelId={hotelId} />
             </div>
             <div className="flex-1">
               <MapComponent
-                placeName={hotel.name}
-                city={hotel.city}
-                country={hotel.country}
+                placeName={hotel?.name}
+                city={hotel?.city}
+                country={hotel?.country}
                 mapPosition={mapPosition} // Pass the position to the MapComponent
               />
             </div>
@@ -297,11 +294,10 @@ const { data: feedbacks, isLoading: feedbacksLoading, isError: feedbacksError } 
           </div>
         </div>
 
-
         <BookingTable />
         <h1 className="text-2xl font-bold mt-9 pl-8 homeTitle">Feedback</h1>
 
-  <FeedbackProperties hotelId={hotelId} />
+        <FeedbackProperties hotelId={hotelId} />
       </div>
     </>
   );

@@ -12,6 +12,7 @@ type AppContextType = {
   showToast: (toastMessage: ToastMessage) => void;
   isLoggedIn: boolean;
   role: string | null;
+  email: string | null;
 };
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
@@ -24,15 +25,18 @@ export const AppContextProvider = ({
   const [toast, setToast] = useState<ToastMessage | undefined>(undefined);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [role, setRole] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
 
   // Khi component mount, lấy lại trạng thái từ localStorage
   useEffect(() => {
     const savedIsLoggedIn = localStorage.getItem("isLoggedIn");
     const savedRole = localStorage.getItem("role");
+    const savedEmail = localStorage.getItem("email");
 
     if (savedIsLoggedIn === "true") {
       setIsLoggedIn(true);
       setRole(savedRole);
+      setEmail(savedEmail);
     }
   }, []);
 
@@ -44,9 +48,11 @@ export const AppContextProvider = ({
       console.log("AppContext: Token validation success", data);
       setIsLoggedIn(true);
       setRole(data?.role || null);
+      setRole(data?.email || null);
       // Lưu trạng thái vào localStorage
       localStorage.setItem("isLoggedIn", "true");
       localStorage.setItem("role", data?.role || "");
+      localStorage.setItem("email", data?.email || "");
     },
     onError: () => {
       console.log("AppContext: Token validation failed");
@@ -55,6 +61,7 @@ export const AppContextProvider = ({
       setRole(null);
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("role");
+      localStorage.removeItem("email");
     },
   });
 
@@ -69,6 +76,7 @@ export const AppContextProvider = ({
         showToast,
         isLoggedIn: !isError && isLoggedIn,
         role,
+        email,
       }}
     >
       {toast && (

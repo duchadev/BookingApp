@@ -3,6 +3,7 @@ import Hotel from "../models/Hotel"; // Adjust the path as necessary
 import { verifyToken, authorizeRoles } from "../middleware/auth"; // Import your middleware
 import nodemailer from "nodemailer";
 const adminRouter = express.Router();
+import User from "../models/user";
 
 // Route to update hotel verification status (Only for admins)
 adminRouter.patch(
@@ -94,6 +95,82 @@ adminRouter.get(
     } catch (error) {
       console.error("Error fetching hotels:", error);
       res.status(500).json({ message: "Server error", error });
+    }
+  }
+);
+adminRouter.get(
+  "/verifyUserRequest",
+  verifyToken,
+  authorizeRoles("admin"),
+  async (req, res) => {
+    const verifyUserRequest = req.query.wantToBeHotelManager as string; 
+
+    try {
+      const query = verifyUserRequest && ["Approved", "Denied", "Pending", "None"].includes(verifyUserRequest)
+        ? { verifyUserRequest }
+        : {};
+
+      const usersReq = await User.find(query);
+      res.status(200).json(usersReq); // Directly return the hotels array
+    } catch (error) {
+      console.error("Error fetching users'requests:", error);
+      res.status(500).json({ message: "Server error", error });
+    }
+  }
+);
+adminRouter.patch(
+  "/:userId/verifyUserRequest",
+  verifyToken,
+  authorizeRoles("admin"),
+  async (req, res) => {
+    const { userId } = req.params;
+    const { action } = req.body;
+
+    try {
+      const status = action === "approve" ? "Approved" : action === "reject" ? "Denied" : null;
+      if (!status) {
+        return res.status(400).json({ message: "Invalid action. Use 'approve' or 'reject'." });
+      }
+
+      const user = await User.findByIdAndUpdate(
+        userId,
+        { wantToBeHotelManager: status },
+        { new: true }
+      );
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      const userEmail = user.email;
+
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+        tls: {
+            rejectUnauthorized: false,
+        },
+      });
+
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: userEmail,
+        subject: `Your Request to be Hotel Owner Status: ${status}`,
+        html: `<p>Your role request has been ${status === "Approved" ? "approved" : "rejected"}.</p>`,
+      };
+
+      await transporter.sendMail(mailOptions);
+
+      res.status(200).json({
+        message: `User's request verification status updated to ${status}. Email sent to user.`,
+        wantToBeHotelManager: status,
+      });
+    } catch (error) {
+      console.error("Error updating status or sending email:", error);
+      res.status(500).json({ message: "Server error.", error });
     }
   }
 );

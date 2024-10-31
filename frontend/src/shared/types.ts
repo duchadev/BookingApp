@@ -8,7 +8,6 @@ export type UserType = {
   lastName: string;
   role: string;
   phone: string;
-  wantToBeHotelManager: "Approved" | "Denied" | "Pending" | "None";
   verificationToken?: string;
   isVerified: boolean;
   status: "Active" | "Inactive" | "Banned"; // user status

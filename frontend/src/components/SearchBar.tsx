@@ -17,13 +17,20 @@ const SearchBar = () => {
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
+
+    // Kiểm tra giá trị của adultCount và childCount
+    console.log("Adult Count:", adultCount);
+    console.log("Child Count:", childCount);
+
     search.saveSearchValues(
+      0, // Giá mặc định cho pricePerNight
       destination,
       checkIn,
       checkOut,
       adultCount,
       childCount
     );
+
     navigate("/search");
   };
 
@@ -102,7 +109,15 @@ const SearchBar = () => {
         <button className="w-2/3 bg-blue-600 text-white h-full p-2 font-bold text-xl hover:bg-blue-500">
           Search
         </button>
-        <button className="w-1/3 bg-red-600 text-white h-full p-2 font-bold text-xl hover:bg-red-500">
+        <button
+          type="button"
+          className="w-1/3 bg-red-600 text-white h-full p-2 font-bold text-xl hover:bg-red-500"
+          onClick={() => {
+            setDestination("");
+            setAdultCount(0);
+            setChildCount(0);
+          }}
+        >
           Clear
         </button>
       </div>

@@ -22,36 +22,50 @@ const upload = multer({
 
 hotelRouter.get("/search", async (req: Request, res: Response) => {
   try {
+    // Xây dựng truy vấn từ các query params
     const query = constructSearchQuery(req.query);
 
-    let sortOptions = {};
+    let sortOptions: any = {};
     switch (req.query.sortOption) {
       case "starRating":
-        sortOptions = { starRating: -1 }; // Sắp xếp theo xếp hạng sao
+        sortOptions = { starRating: -1 }; // Sắp xếp theo sao giảm dần
         break;
       case "pricePerNightAsc":
-        sortOptions = { pricePerNight: 1 };
+        sortOptions = { pricePerNight: 1 }; // Sắp xếp giá tăng dần
         break;
       case "pricePerNightDesc":
-        sortOptions = { pricePerNight: -1 };
+        sortOptions = { pricePerNight: -1 }; // Sắp xếp giá giảm dần
         break;
     }
 
-    const pageSize = 5;
-    const pageNumber = parseInt(
-      req.query.page ? req.query.page.toString() : "1"
-    );
-    const skip = (pageNumber - 1) * pageSize;
+    const pageSize = 5; // Số lượng khách sạn trên mỗi trang
+    const pageNumber = parseInt(req.query.page as string) || 1; // Trang hiện tại
+    const skip = (pageNumber - 1) * pageSize; // Tính số bản ghi bỏ qua cho phân trang
 
+    // Lấy danh sách các khách sạn dựa trên userId của người dùng đăng nhập
+    // Thực hiện truy vấn trong MongoDB với query và bộ lọc
     const hotels = await Hotel.find(query)
       .sort(sortOptions)
       .skip(skip)
-      .limit(pageSize);
+      .limit(pageSize)
+      .lean();
 
-    const total = await Hotel.countDocuments(query);
+    // Sử dụng map để tìm tất cả các phòng liên quan đến từng khách sạn
+    const hotelsWithRooms = await Promise.all(
+      hotels.map(async (hotel) => {
+        const rooms = await Room.find({ hotelId: hotel._id }).lean();
+        return {
+          ...hotel, // Thêm các trường của hotel vào kết quả trả về
+          rooms, // Thêm danh sách rooms vào mỗi hotel
+        };
+      })
+    );
+
+    const total = await Hotel.countDocuments(query); // Đếm tổng số khách sạn tìm thấy
 
     const response: HotelSearchResponse = {
-      data: hotels,
+      data: hotelsWithRooms, // Trả về danh sách hotels kèm theo rooms cho từng hotel
+      // data: hotels,
       pagination: {
         total,
         page: pageNumber,
@@ -59,41 +73,38 @@ hotelRouter.get("/search", async (req: Request, res: Response) => {
       },
     };
 
-    res.json(response);
+    res.status(200).json(response); // Trả về kết quả tìm kiếm
   } catch (error) {
-    console.log("error", error);
-    res.status(500).json({ message: "Something went wrong" });
+    console.error("error", error);
+    res.status(500).json({ message: "Something went wrong" }); // Trả về lỗi nếu có
   }
 });
 
 const constructSearchQuery = (queryParams: any) => {
   let constructedQuery: any = {};
 
-  // Lọc theo name
-  if (queryParams.name) {
-    constructedQuery.name = new RegExp(queryParams.name, "i");
+  // Tìm kiếm theo name hoặc destination (không phân biệt hoa thường)
+  if (queryParams.destination) {
+    constructedQuery.$or = [
+      { name: { $regex: new RegExp(queryParams.destination, "i") } },
+      { destination: { $regex: new RegExp(queryParams.destination, "i") } },
+    ];
   }
+  console.log("Received adultCount:", queryParams.adultCount);
+  console.log("Received childCount:", queryParams.childCount);
 
-  // Lọc theo country (quốc gia)
-  if (queryParams.country) {
-    constructedQuery.country = new RegExp(queryParams.destination, "i");
-  }
-
-  // Lọc theo số người lớn tối đa
-  if (queryParams.maxAdultCount) {
-    constructedQuery.maxAdultCount = {
-      $gte: parseInt(queryParams.maxAdultCount),
-    };
-  }
-
-  // Lọc theo số trẻ em tối đa
-  if (queryParams.maxChildCount) {
+  if (queryParams.childCount) {
     constructedQuery.maxChildCount = {
-      $gte: parseInt(queryParams.maxChildCount),
+      $gte: parseInt(queryParams.childCount, 10),
+    };
+  }
+  if (queryParams.adultCount) {
+    constructedQuery.maxAdultCount = {
+      $gte: parseInt(queryParams.adultCount, 10),
     };
   }
 
-  // Lọc theo tiện nghi
+  // Lọc theo tiện nghi yêu cầu
   if (queryParams.facilities) {
     constructedQuery.facilities = {
       $all: Array.isArray(queryParams.facilities)
@@ -102,7 +113,7 @@ const constructSearchQuery = (queryParams: any) => {
     };
   }
 
-  // Lọc theo loại hình khách sạn (hotel, motel, resort)
+  // Lọc theo loại hình khách sạn
   if (queryParams.types) {
     constructedQuery.type = {
       $in: Array.isArray(queryParams.types)
@@ -114,8 +125,8 @@ const constructSearchQuery = (queryParams: any) => {
   // Lọc theo xếp hạng sao
   if (queryParams.stars) {
     const starRatings = Array.isArray(queryParams.stars)
-      ? queryParams.stars.map((star: string) => parseInt(star))
-      : [parseInt(queryParams.stars)];
+      ? queryParams.stars.map((star: string) => parseInt(star, 10))
+      : [parseInt(queryParams.stars, 10)];
 
     constructedQuery.starRating = { $in: starRatings };
   }
@@ -181,7 +192,7 @@ hotelRouter.post(
         const imageUrls = await uploadImages(imageFiles);
         newHotel.imageUrls = imageUrls;
       }
-      console.log(newHotel);
+
       const hotel = new Hotel(newHotel);
       const savedHotel = await hotel.save();
 
@@ -215,7 +226,7 @@ hotelRouter.get("/", async (req: Request, res: Response) => {
     );
 
     // Trả về danh sách hotels kèm theo rooms cho từng hotel
-    res.json(hotelsWithRooms);
+    res.status(200).json(hotelsWithRooms);
 
     // res.json(hotels);
   } catch (error) {
@@ -243,7 +254,7 @@ hotelRouter.get("/users", verifyToken, async (req: Request, res: Response) => {
     );
 
     // Trả về danh sách hotels kèm theo rooms cho từng hotel
-    res.json(hotelsWithRooms);
+    res.status(200).json(hotelsWithRooms);
   } catch (error) {
     res
       .status(500)

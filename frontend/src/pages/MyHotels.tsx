@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import * as apiClient from "../api-client";
 import { BsBuilding, BsMap } from "react-icons/bs";
 import { BiHotel, BiMoney } from "react-icons/bi";
+import { HotelType } from "../../src/shared/types";
 
 const MyHotels = () => {
   const { data: hotelData } = useQuery(
@@ -33,7 +34,7 @@ const MyHotels = () => {
       {/* Kiểm tra hotelData có danh sách hay không */}
       {hotelData ? (
         <div className="grid grid-cols-1 gap-8">
-          {hotelData.map((hotel) => {
+          {hotelData.map((hotel: HotelType) => {
             // Kiểm tra và tính toán minPrice và maxPrice cho từng khách sạn
             let minPrice, maxPrice;
 

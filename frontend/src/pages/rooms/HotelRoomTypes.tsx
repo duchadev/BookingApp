@@ -13,6 +13,10 @@ import { Dialog } from "primereact/dialog";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
 import { ProgressSpinner } from "primereact/progressspinner";
+import { HotelType } from "../../../src/shared/types";
+
+const VITE_FRONTEND_BASE_URL = import.meta.env.VITE_FRONTEND_BASE_URL;
+const VITE_BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
 // Define Room interface
 interface Room {
@@ -45,13 +49,13 @@ export const HotelRoomTypes = () => {
   };
   const navigate = useNavigate();
   const { hotelId } = useParams();
-  const [hotel, setHotel] = useState(null);
+  const [hotel, setHotel] = useState<HotelType | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const toast = useRef(null);
+  const toast = useRef<Toast | null>(null);
   const dt = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
   const [roomTypes, setRoomTypes] = useState<Room[]>([]);
-  const [room, setRoom] = useState(emptyRoom);
+  const room = emptyRoom;
   // Delete room
   const [deleteRoomsDialog, setDeleteRoomsDialog] = useState(false);
   const [roomTypeToDelete, setRoomTypeToDelete] = useState<string | null>(null);
@@ -63,7 +67,7 @@ export const HotelRoomTypes = () => {
     const fetchHotel = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:7000/api/hotels/${hotelId}`,
+          `${VITE_BACKEND_BASE_URL}/api/hotels/${hotelId}`,
           {
             params: { hotelId },
           }
@@ -79,20 +83,23 @@ export const HotelRoomTypes = () => {
   // Fetch rooms from backend
   const fetchRooms = async () => {
     try {
-      const { data } = await axios.get("http://localhost:7000/api/rooms", {
-        params: { hotelId },
-      });
+      const { data }: { data: Room[] } = await axios.get(
+        `${VITE_BACKEND_BASE_URL}/api/rooms`,
+        {
+          params: { hotelId },
+        }
+      );
 
       // Group rooms by type
-      const roomsByType: Room[] = data.reduce((acc, room: Room) => {
+      const roomsByType = data.reduce<Record<string, Room>>((acc, room) => {
         const { type } = room;
         if (!acc[type]) {
           acc[type] = { ...room, count: 1 }; // Initialize with count 1
         } else {
-          acc[type].count += 1; // Increment count
+          acc[type].count! += 1; // Increment count
         }
         return acc;
-      }, {});
+      }, {} as Record<string, Room>); // Đảm bảo acc được khởi tạo với đúng kiểu
 
       // Convert the grouped object into an array to make it compatible with the DataTable.
       const roomsGroupedByType = Object.values(roomsByType);
@@ -132,7 +139,7 @@ export const HotelRoomTypes = () => {
       label: hotel?.name,
       template: () => (
         <>
-          <Link to={`http://localhost:5174/my-hotels`}>
+          <Link to={`${VITE_FRONTEND_BASE_URL}/my-hotels`}>
             <a className="text-primary">My Hotels</a>
           </Link>
         </>
@@ -142,7 +149,7 @@ export const HotelRoomTypes = () => {
       label: hotel?.name,
       template: () => (
         <>
-          <Link to={`http://localhost:5174/detail/${hotel?._id}`}>
+          <Link to={`${VITE_FRONTEND_BASE_URL}/detail/${hotel?._id}`}>
             <a className="text-primary">{hotel?.name}</a>
           </Link>
         </>
@@ -152,7 +159,9 @@ export const HotelRoomTypes = () => {
       label: "Rooms",
       template: () => (
         <>
-          <Link to={`http://localhost:5174/hotel/${hotel?._id}/rooms/types`}>
+          <Link
+            to={`${VITE_FRONTEND_BASE_URL}/hotel/${hotel?._id}/rooms/types`}
+          >
             <a className="text-primary font-semibold text-blue-600">Rooms</a>
           </Link>
         </>
@@ -160,7 +169,10 @@ export const HotelRoomTypes = () => {
     },
   ];
 
-  const home: MenuItem = { icon: "pi pi-home", url: "http://localhost:5174/" };
+  const home: MenuItem = {
+    icon: "pi pi-home",
+    url: `${VITE_FRONTEND_BASE_URL}`,
+  };
 
   const openNew = () => {
     // hoặc dùng thẻ Link thay vì button và dùng event của hàm này
@@ -195,11 +207,13 @@ export const HotelRoomTypes = () => {
     try {
       // Call backend API to delete rooms of a specific type
       await axios.delete(
-        `http://localhost:7000/api/rooms/type/${roomTypeToDelete}`,
+        `${VITE_BACKEND_BASE_URL}/api/rooms/type/${roomTypeToDelete}`,
         {
           params: { hotelId },
+          withCredentials: true, // Include credentials (cookies or tokens), giống credentials: "include" bên fetch API thông thường
         }
       );
+
       // Update the rooms state
       setRoomTypes((prevRooms) =>
         prevRooms.filter((r) => r.type !== roomTypeToDelete)
@@ -241,9 +255,6 @@ export const HotelRoomTypes = () => {
   const viewRoomsOfType = (type: string) => {
     navigate(`/hotel/${hotel?._id}/rooms/types/${type}`);
   };
-  const editRoomsOfType = (type: string) => {
-    navigate(`/hotel/${hotel?._id}/rooms/type/${type}/edit`);
-  };
 
   const actionBodyTemplate = (roomData: Room) => {
     return (
@@ -256,14 +267,6 @@ export const HotelRoomTypes = () => {
           className="mr-2 text-purple-600 border border-purple-600 hover:bg-purple-600 hover:text-white"
           onClick={() => viewRoomsOfType(roomData.type)}
         />
-        {/* <Button
-          icon="pi pi-pencil"
-          tooltip="Edit Rooms"
-          rounded
-          outlined
-          className="mr-2 text-purple-600 border border-purple-600 hover:bg-purple-600 hover:text-white"
-          onClick={() => editRoomsOfType(roomData.type)}
-        /> */}
         <Button
           icon="pi pi-trash"
           tooltip="Delete Rooms"
@@ -289,7 +292,9 @@ export const HotelRoomTypes = () => {
           <InputText
             type="search"
             className="w-full"
-            onInput={(e) => setGlobalFilter(e.target.value)}
+            onInput={(e) =>
+              setGlobalFilter((e.target as HTMLInputElement).value)
+            }
             placeholder="Search..."
           />
         </div>

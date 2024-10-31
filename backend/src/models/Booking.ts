@@ -13,7 +13,7 @@ const bookingSchema = new mongoose.Schema<BookingType>(
       ref: "Hotel",
       required: true,
     },
-    roomTypeId: {
+    roomId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Room",
       required: true,
@@ -25,7 +25,7 @@ const bookingSchema = new mongoose.Schema<BookingType>(
     totalCost: { type: Number, required: true },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "canceled", "completed"],
+      enum: ["success", "canceled", "pending"],
       default: "pending",
     },
   },

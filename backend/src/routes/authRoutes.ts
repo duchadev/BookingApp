@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import { check, validationResult } from "express-validator";
-import User from "../models/User";
+import User from "../models/user";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { verifyToken } from "../middleware/auth";
@@ -28,16 +28,28 @@ authRoutes.post(
       console.log("Fetched user:", user);
 
       if (!user) {
-        return res.status(400).json({ message: "Invalid Credentials" });
+        return res.status(400).json({ message: "Email is not registered!" });
+      }
+
+      // Kiểm tra xem user đã xác thực email chưa
+      if (!user.isVerified) {
+        return res
+          .status(400)
+          .json({ message: "Please verify your email before logging in" });
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        return res.status(400).json({ message: "Invalid Credentials" });
+        return res.status(400).json({ message: "Password is incorrect!" });
       }
 
       const token = jwt.sign(
-        { userId: user.id, role: user.role, email: user.email },
+        {
+          userId: user.id,
+          role: user.role,
+          email: user.email,
+          firstName: user.firstName,
+        }, // đkí claims vào token khi register (phải giống vs claims bên route /register)
         process.env.JWT_SECRET_KEY as string,
         {
           expiresIn: "1d",
@@ -67,7 +79,9 @@ authRoutes.get(
   "/validate-token",
   verifyToken,
   (req: Request, res: Response) => {
-    res.status(200).send({ userId: req.userId, role: req.role });
+    res
+      .status(200)
+      .send({ userId: req.userId, role: req.role, email: req.email });
   }
 );
 

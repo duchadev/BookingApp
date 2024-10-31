@@ -4,10 +4,10 @@ import L from "leaflet";
 import React, { useEffect, useRef } from "react";
 
 interface MapComponentProps {
-  placeName: string;
-  city: string;
-  country: string;
-  mapPosition: [number, number] | null; // Accept the position as a prop
+  placeName?: string;
+  city?: string;
+  country?: string;
+  mapPosition?: [number, number] | null; // Accept the position as a prop
 }
 
 const MapComponent: React.FC<MapComponentProps> = ({

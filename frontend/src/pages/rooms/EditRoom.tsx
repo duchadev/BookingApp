@@ -7,26 +7,29 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
 import ManageRoomForm from "../../forms/ManageRoomForm/ManageRoomForm";
+import { HotelType } from "../../../src/shared/types";
+
+const VITE_FRONTEND_BASE_URL = import.meta.env.VITE_FRONTEND_BASE_URL;
+const VITE_BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
 const EditRoom = () => {
   const { showToast } = useAppContext();
   const { hotelId, roomId } = useParams();
-  const [error, setError] = useState<string | null>(null);
-  const [hotel, setHotel] = useState(null);
+  const [hotel, setHotel] = useState<HotelType | null>(null);
 
   // Fetch hotel details
   useEffect(() => {
     const fetchHotel = async () => {
       try {
         const { data } = await axios.get(
-          `http://localhost:7000/api/hotels/${hotelId}`,
+          `${VITE_BACKEND_BASE_URL}/api/hotels/${hotelId}`,
           {
             params: { hotelId },
           }
         );
         setHotel(data);
       } catch (err: any) {
-        setError(`Error fetching hotel: ${err.message}`);
+        console.log(`Error fetching hotel: ${err.message}`);
       }
     };
     fetchHotel();
@@ -42,11 +45,12 @@ const EditRoom = () => {
 
   const { mutate, isLoading } = useMutation(apiClient.updateRoomById, {
     onSuccess: () => {
-      showToast({ message: "Room Saved!", type: "SUCCESS" });
+      showToast({ message: "Room Edited!", type: "SUCCESS" });
     },
     onError: (error: unknown) => {
-      // showToast({ message: "Error Edit Room", type: "ERROR" });
-      showToast({ message: error.message, type: "ERROR" });
+      const errorMessage =
+        (error as { message?: string })?.message || "Error Edit Room"; // Fallback cho thông báo lỗi
+      showToast({ message: errorMessage, type: "ERROR" });
     },
   });
 
@@ -59,7 +63,10 @@ const EditRoom = () => {
       label: "My Hotels",
       template: () => (
         <>
-          <a href="http://localhost:5174/my-hotels" className="text-primary">
+          <a
+            href={`${VITE_FRONTEND_BASE_URL}/my-hotels`}
+            className="text-primary"
+          >
             My Hotels
           </a>
         </>
@@ -69,7 +76,7 @@ const EditRoom = () => {
       label: hotel?.name,
       template: () => (
         <>
-          <Link to={`http://localhost:5174/detail/${hotel?._id}`}>
+          <Link to={`${VITE_FRONTEND_BASE_URL}/detail/${hotel?._id}`}>
             <a className="text-primary">{hotel?.name}</a>
           </Link>
         </>
@@ -79,20 +86,14 @@ const EditRoom = () => {
       label: "Rooms",
       template: () => (
         <>
-          <Link to={`http://localhost:5174/hotel/${hotel?._id}/rooms/types`}>
+          <Link
+            to={`${VITE_FRONTEND_BASE_URL}/hotel/${hotel?._id}/rooms/types`}
+          >
             <a className="text-primary">Rooms</a>
           </Link>
         </>
       ),
     },
-    // {
-    //   label: { roomType },
-    //   template: () => (
-    //     <>
-    //       <a className="text-primary font-semibold text-blue-600">{roomType}</a>
-    //     </>
-    //   ),
-    // },
     {
       label: "Edit",
       template: () => (
@@ -102,7 +103,10 @@ const EditRoom = () => {
       ),
     },
   ];
-  const home: MenuItem = { icon: "pi pi-home", url: "http://localhost:5174/" };
+  const home: MenuItem = {
+    icon: "pi pi-home",
+    url: `${VITE_FRONTEND_BASE_URL}`,
+  };
 
   return (
     <>

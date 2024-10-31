@@ -4,108 +4,67 @@ import "../assets/css/home.css";
 import Featured from "../components/Featured";
 import PropertyList from "../components/PropertyList";
 import FeaturedProperties from "../components/FeaturedProperties";
-import { HotelType } from "../../../backend/src/shared/types";
+import { HotelType } from "../../src/shared/types";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import BookingSuccessEmail from "../components/BookingSuccessEmail";
+import BookingCancellationEmail from "../components/BookingCancellationEmail";
+import BookingPendingEmail from "../components/BookingPendingEmail";
 
 const Home = () => {
   const location = useLocation();
 
   // Get the status from query parameters
   const query = new URLSearchParams(location.search);
-  const status = query.get("status");
+  const status = query.get("status"); // CANCELLED or PAID
   const orderCode = query.get("orderCode");
 
   const { data: hotels, isLoading } = useQuery<HotelType[] | undefined>(
     "fetchQuery",
     () => apiClient.fetchHotels()
   );
+  const bookingDetails = location.state; // Lấy dữ liệu từ state
 
-  // Email sending function
-  const sendEmail = async (to: string, subject: string, html: string) => {
-    try {
-      if (!to || !subject || !html) {
-        throw new Error("Email parameters are missing");
+  useEffect(() => {
+    if (bookingDetails) {
+      console.log("Booking Details:", bookingDetails);
+      if (status === "PENDING") {
+        const emailContent = BookingPendingEmail({
+          orderCode: "orderCode",
+          checkInDate: bookingDetails.checkIn,
+          checkOutDate: bookingDetails.checkOut,
+          totalAmount: (
+            bookingDetails.pricePerNight * bookingDetails.numberOfNights
+          ).toString(),
+        });
+        apiClient.sendEmail(
+          bookingDetails.currentUser.email,
+          "😘🤗 Okay! You have chosen offilen payment!",
+          emailContent
+        );
+        console.log("Sending email because status is PENDING");
       }
-
-      const response = await fetch("http://localhost:7000/api/send-email", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ to, subject, html }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to send email. Status: ${response.status}`);
-      }
-
-      console.log("Email sent successfully!");
-    } catch (error) {
-      console.error("Failed to send email:", error);
     }
-  };
+  }, [bookingDetails]);
 
   // Check status and send email if the status is PAID or CANCELLED
   useEffect(() => {
+    const currentEmail = localStorage.getItem("email")?.toString();
     if (status === "PAID") {
-      sendEmail(
-        "huyngoc612@gmail.com", // change email to user's email
-        "Payment Confirmation",
-        `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-          <div style="text-align: center;">
-            <h1 style="color: #4CAF50;">Payment Successful!</h1>
-            <p style="font-size: 18px;">Thank you for completing your transaction.</p>
-          </div>
-    
-          <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin-top: 20px;">
-            <h2 style="color: #333;">Your Payment Details:</h2>
-            <p style="font-size: 16px;">Payment Status: <strong style="color: #4CAF50;">${status}</strong></p>
-            <p style="font-size: 16px;">Transaction ID: <strong>${orderCode}</strong></p>
-            <p style="font-size: 16px;">Date: <strong>${new Date().toLocaleDateString()}</strong></p>
-          </div>
-    
-          <div style="text-align: center; margin-top: 30px;">
-            <a href="https://yourwebsite.com" style="text-decoration: none; background-color: #4CAF50; color: white; padding: 10px 20px; border-radius: 5px;">View your order</a>
-          </div>
-    
-          <p style="text-align: center; font-size: 14px; color: #888; margin-top: 40px;">&copy; 2024 Your Company Name. All rights reserved.</p>
-        </div>
-        `
+      const emailContent = BookingSuccessEmail({ status, orderCode });
+      apiClient.sendEmail(
+        currentEmail,
+        "🛄 Thanks! Your booking is confirmed",
+        emailContent
       );
       console.log("Sending email because status is PAID");
-    }
-
-    if (status === "CANCELLED") {
-      sendEmail(
-        "huyngoc612@gmail.com", // change email to user's email
-        "Order Cancellation",
-        `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-          <div style="text-align: center;">
-            <h1 style="color: #e74c3c;">Booking Cancelled</h1>
-            <p style="font-size: 18px;">We are sorry to inform you that your booking has been cancelled.</p>
-          </div>
-    
-          <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin-top: 20px;">
-            <h2 style="color: #333;">Booking Details:</h2>
-            <p style="font-size: 16px;">Booking Status: <strong style="color: #e74c3c;">${status}</strong></p>
-            <p style="font-size: 16px;">Booking ID: <strong>${orderCode}</strong></p>
-            <p style="font-size: 16px;">Cancellation Date: <strong>${new Date().toLocaleDateString()}</strong></p>
-          </div>
-    
-          <div style="text-align: center; margin-top: 30px;">
-            <a href="https://yourwebsite.com/contact-support" style="text-decoration: none; background-color: #e74c3c; color: white; padding: 10px 20px; border-radius: 5px;">Contact Support</a>
-          </div>
-    
-          <p style="text-align: center; font-size: 14px; color: #888; margin-top: 40px;">&copy; 2024 Your Company Name. All rights reserved.</p>
-        </div>
-        `
-      );
+    } else if (status === "CANCELLED") {
+      const emailContent = BookingCancellationEmail({ status, orderCode });
+      apiClient.sendEmail(currentEmail, "😥 Booking canceled", emailContent);
+      // deleteBookingMutation.mutate(room._id);
       console.log("Sending email because status is CANCELLED");
     }
-  }, [status]);
+  }, [status, orderCode]);
 
   return (
     <div className="space-y-3 mt-32 ">

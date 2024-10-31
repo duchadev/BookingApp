@@ -20,18 +20,16 @@ const DashboardMenu = () => {
                 <Link to="/admin/dashboard" className={`nav-itemx ${location.pathname === "/admin/dashboard" ? "active" : ""}`}>
                     <i className="fas fa-chart-line"></i> Dashboard
                 </Link>
-                <Link to="/admin/verify?verify=Pending" className={`nav-itemx ${location.pathname === "/admin/verify?verify=Pending"? "active" : ""}`}>
-                    <i className="fas fa-boxes"></i> Manage Hotels
+                <Link to="/admin/verify?verify=Pending" className={`nav-itemx ${location.pathname === "/admin/verify?verify=Pending" ? "active" : ""}`}>
+                    <i className="fas fa-boxes"></i> Hotels Request
                 </Link>
 
-                <Link to="/admin/bookings" className={`nav-itemx ${location.pathname === "/admin/bookings" ? "active" : ""}`}>
-                    <i className="fas fa-shopping-cart"></i> Manage Bookings
+                <Link to="/admin/bookings" className={`nav-itemx ${location.pathname === "/" ? "active" : ""}`}>
+                    <i className="fas fa-shopping-cart"></i> Manage Booking
                 </Link>
-                {role === "Admin" && (
-                    <Link to="/admin/users" className={`nav-itemx ${location.pathname === "/admin/users" ? "active" : ""}`}>
-                        <i className="fas fa-users-cog"></i> Manage Users
-                    </Link>
-                )}
+                <Link to="/admin/verifyUserRequest?verify=Pending" className={`nav-itemx ${location.pathname === "/admin/verifyUserRequest?verify=Pending" ? "active" : ""}`}>
+                    <i className="fas fa-users-cog"></i> Users Request
+                </Link>
             </nav>
         </div>
     );
