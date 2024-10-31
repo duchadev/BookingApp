@@ -14,6 +14,11 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin", "hotel_manager"],
       default: "user",
     },
+    wantToBeHotelManager: {
+      type: String,
+      enum: ["Approved", "Denied", "Pending", "None"],
+      default: "None",
+    },
     verificationToken: { type: String },
     isVerified: { type: Boolean, default: false },
     status: {

@@ -24,6 +24,7 @@ const Header = () => {
                 >
                   My Bookings
                 </Link>
+                
                 <SignOutButton />
               </>
             ) : (

@@ -26,7 +26,9 @@ import { HotelRoomTypes } from "./pages/rooms/HotelRoomTypes";
 import AddRoom from "./pages/rooms/AddRoom";
 import EditRoom from "./pages/rooms/EditRoom";
 import { HotelRoomTypeDetails } from "./pages/rooms/HotelRoomTypeDetails";
-
+import Dashboard from "./pages/Dashboard";
+import ManageHotels from "./pages/ManageHotels";
+import ManageUserReq from "./pages/ManageUserReq";
 const App = () => {
   return (
     <Router>
@@ -34,12 +36,10 @@ const App = () => {
         <Route
           path="/"
           element={
-            <>
-              <Layout>
-                <Home />
-                <MailList />
-              </Layout>
-            </>
+            <Layout>
+              <Home />
+              <MailList />
+            </Layout>
           }
         />
         <Route
@@ -58,22 +58,8 @@ const App = () => {
             </Layout>
           }
         />
-        <Route
-          path="/register"
-          element={
-            <Layout>
-              <Register />
-            </Layout>
-          }
-        />
-        <Route
-          path="/sign-in"
-          element={
-            <Layout>
-              <SignIn />
-            </Layout>
-          }
-        />
+        <Route path="/register" element={<Register />} />
+        <Route path="/sign-in" element={<SignIn />} />
 
         {/* Protected Routes based on roles */}
         <Route
@@ -163,6 +149,31 @@ const App = () => {
               <Layout>
                 <MyBookings />
               </Layout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute roles={["admin"]}>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/verify"
+          element={
+            <ProtectedRoute roles={["admin"]}>
+                <ManageHotels />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/verifyUserRequest"
+          element={
+            <ProtectedRoute roles={["admin"]}>
+                <ManageUserReq />
             </ProtectedRoute>
           }
         />
