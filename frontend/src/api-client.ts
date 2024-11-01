@@ -578,6 +578,13 @@ export const fetchBookings = async () => {
   }
   return response.json();  
 };
+export const fetchUsers = async () => {
+  const response = await fetch(`${VITE_BACKEND_BASE_URL}/api/admin/users`);
+  if (!response.ok) {
+    throw new Error("Error fetching hotels");
+  }
+  return response.json();
+};
 
 export const getHotels = async (verifyStatus?: string) => {
   const url = verifyStatus 

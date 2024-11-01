@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getHotels, updateHotelStatus } from '../api-client';
 import "../assets/css/manageHotels.css";
 import DashboardMenu from "./DashboardMenu";
-import Layout from "../layouts/Layout";
+import AdminTopbar from '../components/AdminTopbar';
 
 interface Hotel {
     _id: string;
@@ -104,12 +104,13 @@ const ManageHotels: React.FC = () => {
     // }
 
     return (
-        <Layout className="dashboard-layout">
-            <div className="dashboard-container">
+        <>
+            <AdminTopbar />
+            <div className="dashboard-container pt-32">
                 <DashboardMenu />
                 <main className="dashboard-main">
-                    <div className="bg-gray-50 min-h-screen">
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className=" min-h-screen">
+                        <div className="summary-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                             <div className="sm:flex sm:items-center">
                                 <div className="sm:flex-auto">
                                     <h1 className="text-2xl font-semibold text-gray-900">Manage Hotels</h1>
@@ -124,7 +125,7 @@ const ManageHotels: React.FC = () => {
                             <div className="mt-8 flex flex-col">
                                 <div className="overflow-x-auto">
                                     <div className="inline-block min-w-full">
-                                        <div className="overflow-hidden shadow-md rounded-lg border border-gray-200">
+                                        <div className="overflow-hidden  rounded-lg border border-gray-950">
                                             <table className="min-w-full divide-y divide-gray-200">
                                                 <thead className="bg-gray-50">
                                                     <tr>
@@ -223,8 +224,7 @@ const ManageHotels: React.FC = () => {
                     </div>
                 </main>
             </div>
-        </Layout>
-    );
+        </>);
 };
 
 export default ManageHotels;
