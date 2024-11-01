@@ -174,5 +174,17 @@ adminRouter.patch(
     }
   }
 );
+adminRouter.get('/users', async (req, res) => {
+  try {
+    const users = await User.find(); // Fetch all users
+    const userCount = users.length; // Get the length of the users array
+    console.log("Number of users fetched:", userCount); // Log the count of users
+    res.json({ userCount }); // Send the count as a response
+  } catch (error) {
+    console.error("Error fetching users:", error); // Log any errors
+    res.status(500).json({ message: 'Error fetching users' });
+  }
+});
+
 
 export default adminRouter;
