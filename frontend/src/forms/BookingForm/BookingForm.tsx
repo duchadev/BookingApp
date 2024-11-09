@@ -129,8 +129,8 @@ const BookingForm = ({ currentUser }: Props) => {
         <span className="text-lg font-bold"></span>
         <div className="flex flex-wrap mt-4">
           <p>
-            Khi nhận phòng, khách phải cung cấp giấy tờ tùy thân có tên trùng
-            với tên này.{" "}
+            Upon check-in, guests must provide identification with the same
+            name.{" "}
           </p>
         </div>
       </div>

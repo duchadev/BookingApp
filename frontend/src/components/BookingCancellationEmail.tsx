@@ -1,11 +1,16 @@
 // components/OrderCancellationEmail.js
 const BookingCancellationEmail = ({
+  bookingId,
   status,
-  orderCode,
 }: {
+  bookingId: string;
   status: string;
-  orderCode: string | null;
 }) => {
+  const bookingData = JSON.parse(
+    localStorage.getItem("pendingBooking") || "{}"
+  );
+  if (!bookingData) return "<p>Booking information is missing.</p>";
+
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
       <div style="text-align: center;">
@@ -16,7 +21,7 @@ const BookingCancellationEmail = ({
       <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; margin-top: 20px;">
         <h2 style="color: #333;">Booking Details:</h2>
         <p style="font-size: 16px;">Booking Status: <strong style="color: #e74c3c;">${status}</strong></p>
-        <p style="font-size: 16px;">Booking ID: <strong>${orderCode}</strong></p>
+        <p style="font-size: 16px;">Booking ID: <strong>${bookingId}</strong></p>
         <p style="font-size: 16px;">Cancellation Date: <strong>${new Date().toLocaleDateString()}</strong></p>
       </div>
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
@@ -8,6 +8,7 @@ import * as apiClient from "../api-client";
 import { useQuery, useMutation } from "react-query";
 import { useNavigate } from "react-router-dom"; // Assuming you're using react-router-dom for navigation
 import { HotelType } from "../../src/shared/types";
+import { Toast } from "primereact/toast";
 
 interface ApiError {
   errorData?: {
@@ -17,6 +18,7 @@ interface ApiError {
 }
 
 const FeedbackComponent = ({ hotel }: { hotel?: HotelType }) => {
+  const toast = useRef<Toast>(null);
   const [visible, setVisible] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [bookingId, setBookingId] = useState("");
@@ -42,6 +44,11 @@ const FeedbackComponent = ({ hotel }: { hotel?: HotelType }) => {
       setValue(undefined);
       setBookingId("");
       setIsSubmitting(false);
+      toast.current?.show({
+        severity: "success",
+        summary: "Success",
+        detail: "Feedback successfully submitted!",
+      });
       window.location.reload(); // Reload trang sau khi xóa thành công
     },
     onError: (error: ApiError) => {
@@ -101,58 +108,61 @@ const FeedbackComponent = ({ hotel }: { hotel?: HotelType }) => {
   );
 
   return (
-    <div className="flex justify-content-center">
-      {currentUser ? (
-        <Button
-          label="Write a feedback"
-          severity="secondary"
-          onClick={showModal}
-        />
-      ) : (
-        <Button label="Login to Feedback" onClick={handleLoginRedirect} />
-      )}
-
-      <Dialog
-        header="User Feedback"
-        visible={visible}
-        style={{ width: "50vw" }}
-        footer={footer}
-        onHide={() => setVisible(false)}
-      >
-        <div className="flex flex-column gap-2 mt-1">
-          <label htmlFor="hotel">Booking ID:</label>
-          <InputText
-            id="hotel"
-            value={bookingId}
-            onChange={(e) => setBookingId(e.target.value)}
+    <>
+      <Toast ref={toast} />
+      <div className="flex justify-content-center">
+        {currentUser ? (
+          <Button
+            label="Write a feedback"
+            severity="secondary"
+            onClick={showModal}
           />
-          <label htmlFor="feedback">Please provide your feedback:</label>
-          <InputTextarea
-            id="feedback"
-            value={feedback}
-            onChange={(e) => setFeedback(e.target.value)}
-            rows={5}
-          />
-        </div>
-        <div className=" flex justify-content-center mt-2">
-          <Rating
-            value={value}
-            onChange={(e) => setValue(e.value === null ? undefined : e.value)}
-            cancel={false}
-          />
-        </div>
-
-        {/* Display the error message */}
-        {errorMessage && (
-          <div
-            className="error-message"
-            style={{ color: "red", marginTop: "10px" }}
-          >
-            {errorMessage}
-          </div>
+        ) : (
+          <Button label="Login to Feedback" onClick={handleLoginRedirect} />
         )}
-      </Dialog>
-    </div>
+
+        <Dialog
+          header="User Feedback"
+          visible={visible}
+          style={{ width: "50vw" }}
+          footer={footer}
+          onHide={() => setVisible(false)}
+        >
+          <div className="flex flex-column gap-2 mt-1">
+            <label htmlFor="hotel">Booking ID:</label>
+            <InputText
+              id="hotel"
+              value={bookingId}
+              onChange={(e) => setBookingId(e.target.value)}
+            />
+            <label htmlFor="feedback">Please provide your feedback:</label>
+            <InputTextarea
+              id="feedback"
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
+              rows={5}
+            />
+          </div>
+          <div className=" flex justify-content-center mt-2">
+            <Rating
+              value={value}
+              onChange={(e) => setValue(e.value === null ? undefined : e.value)}
+              cancel={false}
+            />
+          </div>
+
+          {/* Display the error message */}
+          {errorMessage && (
+            <div
+              className="error-message"
+              style={{ color: "red", marginTop: "10px" }}
+            >
+              {errorMessage}
+            </div>
+          )}
+        </Dialog>
+      </div>
+    </>
   );
 };
 

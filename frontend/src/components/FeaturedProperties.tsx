@@ -70,16 +70,18 @@ const FeaturedProperties: React.FC<FeaturedProps> = ({ hotels }) => {
   return (
     <>
       {hotels && (
-        <Carousel
-          value={hotels}
-          numVisible={3}
-          numScroll={3}
-          responsiveOptions={responsiveOptions}
-          itemTemplate={hotelTemplate}
-          className="custom-carousel"
-          circular
-          autoplayInterval={3000}
-        />
+        <div className="max-w-screen-xl mx-auto">
+          <Carousel
+            value={hotels}
+            numVisible={3}
+            numScroll={3}
+            responsiveOptions={responsiveOptions}
+            itemTemplate={hotelTemplate}
+            className="custom-carousel"
+            circular
+            autoplayInterval={3000}
+          />
+        </div>
       )}
     </>
   );

@@ -14,6 +14,7 @@ import FeedbackComponent from "../../src/components/FeedbackComponent";
 import FeedbackProperties from "../components/FeedbackProperties";
 import { RoomType } from "../../src/shared/types";
 import HotelFeedBackProperty from "../components/HotelFeedbackProperty";
+import { Toast } from "primereact/toast";
 const VITE_FRONTEND_BASE_URL = import.meta.env.VITE_FRONTEND_BASE_URL;
 
 interface Item {
@@ -29,6 +30,7 @@ interface CustomImageData {
 
 const Detail = () => {
   const { hotelId } = useParams();
+  const toast = useRef<Toast>(null);
   const [images, setImages] = useState<CustomImageData[]>([]); // Thay đổi giá trị khởi tạo thành mảng rỗng
   const menu = useRef<TieredMenu | null>(null);
   const [mapPosition, setMapPosition] = useState<[number, number] | null>(null);
@@ -140,7 +142,11 @@ const Detail = () => {
     navigator.clipboard
       .writeText(window.location.href)
       .then(() => {
-        alert("Link copied to clipboard!");
+        toast.current?.show({
+          severity: "info",
+          summary: "Info",
+          detail: "Link copied to clipboard!",
+        });
       })
       .catch((err) => {
         console.error("Failed to copy: ", err);
@@ -180,6 +186,7 @@ const Detail = () => {
 
   return (
     <>
+      <Toast ref={toast} />
       <div className="space-y-6">
         <BreadCrumb model={items} home={home} />
 
@@ -288,7 +295,7 @@ const Detail = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr]">
-          <div className="whitespace-pre-line">{hotel?.description}</div>
+          <div className="whitespace-pre-line pr-8">{hotel?.description}</div>
           <div className="h-fit">
             <GuestInfoForm pricePerNight={minPrice} hotelId={hotel?._id} />
           </div>

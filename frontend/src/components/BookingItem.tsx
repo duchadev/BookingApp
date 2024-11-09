@@ -5,6 +5,7 @@ import { MenuItem } from "primereact/menuitem";
 import { useMutation, useQueryClient } from "react-query";
 import { Toast } from "primereact/toast";
 import { deleteBookingById } from "../api-client";
+import { Link } from "react-router-dom";
 
 interface BookingItemProps {
   bookingId: string;
@@ -96,32 +97,34 @@ const BookingItem: React.FC<BookingItemProps> = ({
         <p className="text-gray-500 mb-4">{dates}</p>
 
         <div className="flex items-center justify-between bg-white rounded-lg shadow p-4 relative">
-          <div className="flex items-center space-x-4">
-            <img
-              src={hotelImage}
-              alt="Hotel"
-              className="w-16 h-16 rounded-lg"
-            />
-            <div>
-              <h3 className="text-lg font-semibold">{hotelName}</h3>
-              <p className="text-gray-500">
-                {dates} · {city}, {country}
-              </p>
-              <p
-                className={`text-${
-                  status === "canceled"
-                    ? "red"
-                    : status === "success"
-                    ? "green"
-                    : status === "pending"
-                    ? "yellow"
-                    : "gray"
-                }-600 `}
-              >
-                {capitalizeFirstLetter(status)}
-              </p>
+          <Link to={`/my-bookings/details/${bookingId}`}>
+            <div className="flex items-center space-x-4">
+              <img
+                src={hotelImage}
+                alt="Hotel"
+                className="w-16 h-16 rounded-lg"
+              />
+              <div>
+                <h3 className="text-lg font-semibold">{hotelName}</h3>
+                <p className="text-gray-500">
+                  {dates} · {city}, {country}
+                </p>
+                <p
+                  className={`text-${
+                    status === "canceled"
+                      ? "red"
+                      : status === "success"
+                      ? "green"
+                      : status === "pending"
+                      ? "yellow"
+                      : "gray"
+                  }-600 `}
+                >
+                  {capitalizeFirstLetter(status)}
+                </p>
+              </div>
             </div>
-          </div>
+          </Link>
           <div className="flex items-center space-x-2">
             <span className="text-lg font-semibold">
               VND {price.toLocaleString()}

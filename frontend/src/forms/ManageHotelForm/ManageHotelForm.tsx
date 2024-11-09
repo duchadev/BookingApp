@@ -49,8 +49,8 @@ const ManageHotelForm = ({ onSave, isLoading, hotel }: Props) => {
     formData.append("type", formDataJson.type);
     // formData.append("pricePerNight", formDataJson.pricePerNight.toString());
     // formData.append("starRating", formDataJson.starRating.toString());
-    formData.append("maxAdultCount", formDataJson.maxAdultCount.toString());
-    formData.append("maxChildCount", formDataJson.maxChildCount.toString());
+    // formData.append("maxAdultCount", formDataJson.maxAdultCount.toString());
+    // formData.append("maxChildCount", formDataJson.maxChildCount.toString());
 
     formDataJson.facilities.forEach((facility, index) => {
       formData.append(`facilities[${index}]`, facility);
@@ -76,7 +76,7 @@ const ManageHotelForm = ({ onSave, isLoading, hotel }: Props) => {
         <DetailsSection />
         <TypeSection />
         <FacilitiesSection />
-        <GuestsSection />
+        {/* <GuestsSection /> */}
         <ImagesSection />
         <span className="flex justify-end">
           <button

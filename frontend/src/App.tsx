@@ -26,11 +26,24 @@ import { HotelRoomTypes } from "./pages/rooms/HotelRoomTypes";
 import AddRoom from "./pages/rooms/AddRoom";
 import EditRoom from "./pages/rooms/EditRoom";
 import { HotelRoomTypeDetails } from "./pages/rooms/HotelRoomTypeDetails";
+import MyBookingDetails from "./pages/MyBookingDetails";
+import Demo from "./pages/Demo";
+import { HotelCustomerBookings } from "./pages/HotelCustomerBookings";
 
 const App = () => {
   return (
     <Router>
       <Routes>
+        <Route
+          path="/demo"
+          element={
+            <>
+              <Layout>
+                <Demo />
+              </Layout>
+            </>
+          }
+        />
         <Route
           path="/"
           element={
@@ -82,6 +95,16 @@ const App = () => {
             <ProtectedRoute roles={["user", "hotel_manager", "admin"]}>
               <Layout>
                 <Booking />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/hotel/:hotelId/customer-bookings"
+          element={
+            <ProtectedRoute roles={["hotel_manager", "admin"]}>
+              <Layout>
+                <HotelCustomerBookings />
               </Layout>
             </ProtectedRoute>
           }
@@ -162,6 +185,16 @@ const App = () => {
             <ProtectedRoute roles={["user", "hotel_manager", "admin"]}>
               <Layout>
                 <MyBookings />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-bookings/details/:bookingId"
+          element={
+            <ProtectedRoute roles={["user", "hotel_manager", "admin"]}>
+              <Layout>
+                <MyBookingDetails />
               </Layout>
             </ProtectedRoute>
           }

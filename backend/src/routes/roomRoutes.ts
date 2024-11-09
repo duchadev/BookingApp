@@ -5,6 +5,7 @@ import { authorizeRoles, verifyToken } from "../middleware/auth";
 import Room from "../models/Room";
 import { RoomType } from "../shared/types";
 import { uploadImages } from "../helpers/uploadFile";
+import Booking from "../models/Booking";
 
 const roomRoutes = express.Router();
 
@@ -69,6 +70,88 @@ roomRoutes.post(
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Server error", error: error.message });
+    }
+  }
+);
+
+// API endpoint to get all room types in a hotel with availability count and list of available rooms in a given date range
+roomRoutes.get(
+  "/rooms-with-availability",
+  async (req: Request, res: Response) => {
+    const { hotelId, checkIn, checkOut } = req.query;
+
+    try {
+      const checkInDate = new Date(checkIn as string);
+      const checkOutDate = new Date(checkOut as string);
+
+      if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
+        return res
+          .status(400)
+          .json({ error: "Invalid checkIn or checkOut date." });
+      }
+      if (checkInDate >= checkOutDate) {
+        return res
+          .status(400)
+          .json({ error: "checkIn date must be before checkOut date." });
+      }
+
+      // Retrieve all rooms in the hotel
+      const allRooms = await Room.find({ hotelId });
+
+      // Group rooms by their type
+      const roomsByType = allRooms.reduce((acc, room) => {
+        if (!acc[room.type]) {
+          acc[room.type] = [];
+        }
+        acc[room.type].push(room);
+        return acc;
+      }, {} as Record<string, any[]>);
+
+      // Retrieve bookings in the given date range
+      const bookedRooms = await Booking.find({
+        hotelId,
+        status: { $in: ["success", "pending"] }, // check only bookings with "success" or "pending" status
+        $or: [
+          { checkIn: { $lt: checkOutDate }, checkOut: { $gt: checkInDate } },
+        ],
+      });
+
+      // // Convert bookedRooms to a set for fast lookup
+      // const bookedRoomIds = new Set(
+      //   bookedRooms.map((booking) => booking.roomId.toString())
+      // );
+
+      // Convert bookedRooms to a set of all booked room IDs for fast lookup
+      const bookedRoomIds = new Set(
+        bookedRooms.flatMap((booking) =>
+          booking.roomIds.map((id) => id.toString())
+        )
+      );
+
+      // Count availability and retrieve list of available rooms by type
+      const roomAvailability = Object.entries(roomsByType).map(
+        ([type, rooms]) => {
+          const availableRooms = rooms.filter(
+            (room) => !bookedRoomIds.has(room._id.toString())
+          );
+          const availableCount = availableRooms.length;
+
+          return {
+            type,
+            totalRooms: rooms.length,
+            bookedCount: rooms.length - availableCount,
+            availableCount,
+            availableRooms, // Include list of available rooms
+          };
+        }
+      );
+
+      res.status(200).json(roomAvailability);
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ error: "An error occurred while fetching room availability." });
     }
   }
 );

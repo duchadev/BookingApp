@@ -15,8 +15,7 @@ type Props = {
   childCount: number;
   numberOfNights: number;
   hotel: HotelType;
-  roomSeleted: RoomType;
-  pricePerNight: number;
+  selectedRooms: RoomType[];
   currentUser?: UserType;
 };
 
@@ -26,20 +25,41 @@ const BookingDetailsSummary = ({
   adultCount,
   childCount,
   numberOfNights,
-  pricePerNight,
   hotel,
-  roomSeleted,
+  selectedRooms,
   currentUser,
 }: Props) => {
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState<boolean>(false);
+  // const [bookingId, setBookingId] = useState<string>("");
   const toast = useRef<Toast>(null);
   const buttonEl = useRef(null);
   const navigate = useNavigate();
-  const totalCost = pricePerNight * numberOfNights;
+  // Tính tổng chi phí dựa trên tất cả các phòng đã chọn
+  const totalCost = selectedRooms.reduce((total, room) => {
+    return total + room.pricePerNight * numberOfNights;
+  }, 0);
+
+  const roomIds = selectedRooms.map((room) => room._id);
 
   const mutation = useMutation(apiClient.addBooking, {
-    onSuccess: () => {
+    onSuccess: (res: any) => {
+      const bookingId = res._id;
+      console.log(res);
+      localStorage.setItem(
+        "bookingData",
+        JSON.stringify({
+          bookingId,
+          checkIn,
+          checkOut,
+          adultCount,
+          childCount,
+          numberOfNights,
+          totalCost,
+          hotel,
+          currentUser,
+        })
+      );
       // showToast({ message: "Room Saved!", type: "SUCCESS" });
     },
     onError: () => {
@@ -48,38 +68,12 @@ const BookingDetailsSummary = ({
   });
 
   const accept = async (paymentMethod: "online" | "offline") => {
-    // console.log("data: ", {
-    //   hotelId: hotel?._id, // dùng key hotelId thay vì hotel._id
-    //   roomId: roomSeleted?._id,
-    //   adultCount,
-    //   childCount,
-    //   checkIn,
-    //   checkOut,
-    //   totalCost: numberOfNights * pricePerNight,
-    // });
-
     if (paymentMethod === "online") {
       await handleConfirmPayment();
-      mutation.mutate({
-        hotelId: hotel._id, // dùng key hotelId thay vì hotel._id
-        roomId: roomSeleted._id,
-        adultCount,
-        childCount,
-        checkIn,
-        checkOut,
-        totalCost: totalCost,
-        status: "success",
-      });
     } else {
-      // toast.current?.show({
-      //   severity: "info",
-      //   summary: "Payment Method",
-      //   detail: "You have selected Offline Payment",
-      //   life: 3000,
-      // });
       mutation.mutate({
         hotelId: hotel._id, // dùng key hotelId thay vì hotel._id
-        roomId: roomSeleted._id,
+        roomIds,
         adultCount,
         childCount,
         checkIn,
@@ -95,7 +89,7 @@ const BookingDetailsSummary = ({
           adultCount,
           childCount,
           numberOfNights,
-          pricePerNight,
+          totalCost,
           hotel,
           currentUser,
         },
@@ -103,7 +97,7 @@ const BookingDetailsSummary = ({
     }
   };
 
-  function formatDate(date: Date) {
+  function formatTime(date: Date) {
     const hours = date.getHours();
     const minutes = date.getMinutes();
     const ampm = hours >= 12 ? "PM" : "AM";
@@ -128,24 +122,34 @@ const BookingDetailsSummary = ({
     const payload = {
       orderCode: Random(),
       amount: 5000, // totalCost
-      description: `Booking ${hotel.name}`, // bị giới hạn kí tự
-      returnUrl: `${FRONTEND_BASE_URL}`, // back home page
+      description: `Booking`, // bị giới hạn kí tự, nếu dài sẽ bị lỗi `Không có URL thanh toán được trả về. Vui lòng thử lại.` ở dưới
+      returnUrl: `${FRONTEND_BASE_URL}`, // back home page, http://localhost:5174/
       cancelUrl: `${FRONTEND_BASE_URL}`, // back home page
       buyerName: `${currentUser?.firstName} ${currentUser?.lastName}`,
       buyerEmail: `${currentUser?.email}`,
       buyerPhone: `${currentUser?.phone}`,
-      //   items: [
-      //     {
-      //       name: "Iphone",
-      //       quantity: 2,
-      //       price: 28000000,
-      //     },
-      //   ],
-      // };
       customerName: "Guest User", // phải có vì bên code của Tín folder Payos
       customerPhone: "0123456789", // phải có vì bên code của Tín folder Payos
       customerAddress: `${hotel.city}, ${hotel.country}`, // phải có vì bên code của Tín folder Payos
     };
+
+    // Lưu booking data vào localStorage
+    localStorage.setItem(
+      "pendingBooking",
+      JSON.stringify({
+        hotelId: hotel._id,
+        roomIds,
+        adultCount,
+        childCount,
+        checkIn,
+        checkOut,
+        totalCost,
+        status: "pending", // trạng thái ban đầu là pending
+        numberOfNights,
+        hotel,
+        currentUser,
+      })
+    );
 
     try {
       const response = await fetch(url, {
@@ -200,21 +204,29 @@ const BookingDetailsSummary = ({
           Location:
           <div className="font-bold">{`${hotel.name}, ${hotel.city}, ${hotel.country}`}</div>
         </div>
+        <div className="border-b py-2">
+          Number of booked rooms:
+          <div className="font-bold">{roomIds.length}</div>
+        </div>
         <div className="flex justify-between">
           <div>
             Check-in:
             <div className="mt-1 font-bold"> {checkIn.toDateString()}</div>
-            <div className=""> {formatDate(checkIn)}</div>
+            <div className=""> {formatTime(checkIn)}</div>
           </div>
           <div>
             Check-out:
             <div className="mt-1 font-bold"> {checkOut.toDateString()}</div>
-            <div className=""> {formatDate(checkOut)}</div>
+            <div className=""> {formatTime(checkOut)}</div>
           </div>
         </div>
         <div className="border-t border-b py-2">
           Total length of stay:
-          <div className="font-bold">{numberOfNights} nights</div>
+          <div className="font-bold">
+            {numberOfNights > 0
+              ? `${numberOfNights} night${numberOfNights > 1 ? "s" : ""}`
+              : "No nights"}
+          </div>
         </div>
 
         <div>

@@ -8,6 +8,7 @@ import {
   RoomType,
   UserType,
 } from "../src/shared/types";
+import axios from "axios";
 const VITE_BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 
 export const fetchCurrentUser = async (): Promise<UserType> => {
@@ -142,6 +143,20 @@ export const addMyHotel = async (hotelFormData: FormData) => {
   }
 
   return response.json();
+};
+
+export const deleteHotel = async (hotelId: string) => {
+  try {
+    const response = await axios.delete(
+      `${VITE_BACKEND_BASE_URL}/api/hotels/${hotelId}`,
+      {
+        withCredentials: true, // Include credentials (cookies or tokens), giống credentials: "include" bên fetch API thông thường
+      }
+    );
+    return response.data; // hoặc tùy thuộc vào cấu trúc dữ liệu trả về
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error deleting hotel");
+  }
 };
 
 // export const fetchMyHotels = async (): Promise<HotelType[]> => {
@@ -311,6 +326,35 @@ export const deleteBookingById = async (bookingId: string) => {
 
     return response.json();
   } catch (error: any) {
+    throw new Error(error.message || "An unknown error occurred");
+  }
+};
+
+export const getBookingById = async (bookingId: string) => {
+  try {
+    const response = await fetch(
+      `${VITE_BACKEND_BASE_URL}/api/bookings/${bookingId}`,
+      {
+        method: "GET",
+        credentials: "include",
+      }
+    );
+
+    // Kiểm tra nếu phản hồi không thành công
+    if (!response.ok) {
+      // Lấy thông tin lỗi từ phản hồi JSON
+      const errorData = await response.json();
+      throw new Error(
+        `Failed to fetch Booking: ${response.status} - ${
+          errorData.message || errorData.error || "Unknown error"
+        }`
+      );
+    }
+
+    // Trả về phản hồi JSON nếu thành công
+    return response.json();
+  } catch (error: any) {
+    // Ném ra lỗi với thông tin cụ thể
     throw new Error(error.message || "An unknown error occurred");
   }
 };
@@ -529,7 +573,7 @@ export const fetchTop5Feedback = async (hotelId?: string) => {
 
 export const addBooking = async (bookingData: any) => {
   try {
-    console.log("booking: ", bookingData);
+    console.log("bookingData: ", bookingData);
     const response = await fetch(`${VITE_BACKEND_BASE_URL}/api/bookings`, {
       method: "POST",
       credentials: "include",
@@ -546,9 +590,10 @@ export const addBooking = async (bookingData: any) => {
       // Ném ra lỗi với thông tin từ phản hồi và mã trạng thái
       throw { errorData, status: response.status };
     }
-
+    const res = await response.json();
+    console.log("res: ", res);
     // Nếu thành công, trả về dữ liệu JSON
-    return await response.json();
+    return res;
   } catch (error: any) {
     // Nếu lỗi là lỗi tùy chỉnh từ phía trên, ném lại lỗi với chi tiết
     if (error.errorData && error.status) {
