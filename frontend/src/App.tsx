@@ -29,6 +29,7 @@ import { HotelRoomTypeDetails } from "./pages/rooms/HotelRoomTypeDetails";
 import Dashboard from "./pages/Dashboard";
 import ManageHotels from "./pages/ManageHotels";
 import ManageUserReq from "./pages/ManageUserReq";
+import Profile from "./pages/Profile";
 const App = () => {
   return (
     <Router>
@@ -148,6 +149,16 @@ const App = () => {
             <ProtectedRoute roles={["user", "hotel_manager", "admin"]}>
               <Layout>
                 <MyBookings />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/my-profile"
+          element={
+            <ProtectedRoute roles={["user", "hotel_manager", "admin"]}>
+              <Layout>
+                <Profile/>
               </Layout>
             </ProtectedRoute>
           }
