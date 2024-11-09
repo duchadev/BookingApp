@@ -12,6 +12,7 @@ import bookingRoutes from "./routes/bookingRoutes";
 import roomRoutes from "./routes/roomRoutes";
 import sendEmailRoutes from "./routes/sendEmailRoutes";
 import feedbackRoutes from "./routes/feedbackRoutes";
+import adminRoutes from "./routes/adminRouter";
 import morgan from "morgan";
 
 const BACKEND_URL = process.env.BACKEND_BASE_URL;
@@ -46,6 +47,7 @@ app.use("/api/rooms", roomRoutes);
 app.use("/api/booking", roomRoutes);
 app.use("/api", sendEmailRoutes);
 app.use("/api/feedback", feedbackRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/bookings", bookingRoutes);
 
 // app.use("/api/admin", adminRouter);

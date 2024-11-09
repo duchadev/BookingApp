@@ -2,6 +2,25 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "react-query";
 import * as apiClient from "../api-client";
 import { useAppContext } from "../contexts/AppContext";
+import { useNavigate } from "react-router-dom";
+import {
+  Container,
+  Row,
+  Col,
+  Form,
+  Button,
+  Card,
+  Alert,
+} from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faUser,
+  faEnvelope,
+  faPhone,
+  faLock,
+  faHotel,
+} from "@fortawesome/free-solid-svg-icons";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 export type RegisterFormData = {
   firstName: string;
@@ -44,99 +63,228 @@ const Register = () => {
   });
 
   return (
-    <form className="flex flex-col gap-5" onSubmit={onSubmit}>
-      <h2 className="text-3xl font-bold">Create an Account</h2>
-      <div className="flex flex-col md:flex-row gap-5">
-        <label className="text-gray-700 text-sm font-bold flex-1">
-          First Name
-          <input
-            className="border rounded w-full py-1 px-2 font-normal"
-            {...register("firstName", { required: "This field is required" })}
-          ></input>
-          {errors.firstName && (
-            <span className="text-red-500">{errors.firstName.message}</span>
-          )}
-        </label>
-        <label className="text-gray-700 text-sm font-bold flex-1">
-          Last Name
-          <input
-            className="border rounded w-full py-1 px-2 font-normal"
-            {...register("lastName", { required: "This field is required" })}
-          ></input>
-          {errors.lastName && (
-            <span className="text-red-500">{errors.lastName.message}</span>
-          )}
-        </label>
-      </div>
-      <div className="flex flex-col md:flex-row gap-5">
-        <label className="text-gray-700 text-sm font-bold flex-1">
-          Phone
-          <input
-            type="number"
-            className="border rounded w-full py-1 px-2 font-normal"
-            {...register("phone", { required: "This field is required" })}
-          ></input>
-          {errors.phone && (
-            <span className="text-red-500">{errors.phone.message}</span>
-          )}
-        </label>
-        <label className="text-gray-700 text-sm font-bold flex-1">
-          Email
-          <input
-            type="email"
-            className="border rounded w-full py-1 px-2 font-normal"
-            {...register("email", { required: "This field is required" })}
-          ></input>
-          {errors.email && (
-            <span className="text-red-500">{errors.email.message}</span>
-          )}
-        </label>
-      </div>
-      <label className="text-gray-700 text-sm font-bold flex-1">
-        Password
-        <input
-          type="password"
-          className="border rounded w-full py-1 px-2 font-normal"
-          {...register("password", {
-            required: "This field is required",
-            minLength: {
-              value: 6,
-              message: "Password must be at least 6 characters",
-            },
-          })}
-        ></input>
-        {errors.password && (
-          <span className="text-red-500">{errors.password.message}</span>
-        )}
-      </label>
-      <label className="text-gray-700 text-sm font-bold flex-1">
-        Confirm Password
-        <input
-          type="password"
-          className="border rounded w-full py-1 px-2 font-normal"
-          {...register("confirmPassword", {
-            validate: (val) => {
-              if (!val) {
-                return "This field is required";
-              } else if (watch("password") !== val) {
-                return "Your passwords do no match";
-              }
-            },
-          })}
-        ></input>
-        {errors.confirmPassword && (
-          <span className="text-red-500">{errors.confirmPassword.message}</span>
-        )}
-      </label>
-      <span>
-        <button
-          type="submit"
-          className="bg-blue-600 text-white p-2 font-bold hover:bg-blue-500 text-xl"
-        >
-          Create Account
-        </button>
-      </span>
-    </form>
+    <Container fluid className="bg-light min-vh-100 py-5">
+      <Row className="justify-content-center">
+        <Col xs={12} md={8} lg={6}>
+          <Card className="shadow-lg border-0">
+            <Card.Header className="bg-blue-700 text-white text-center border-0 pt-4">
+              <div className="mb-3">
+                <FontAwesomeIcon icon={faHotel} size="3x" />
+              </div>
+              <h2 className="fw-bold">Create your account</h2>
+              <p className="opacity-75">
+                Join us to access exclusive hotel deals and manage your bookings
+              </p>
+            </Card.Header>
+
+            <Card.Body className="px-4 py-4">
+              <Form onSubmit={onSubmit}>
+                <Row className="mb-3">
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="fw-semibold">
+                        First Name
+                      </Form.Label>
+                      <div className="input-group">
+                        <span className="input-group-text bg-light">
+                          <FontAwesomeIcon
+                            icon={faUser}
+                            className="text-blue-700"
+                          />
+                        </span>
+                        <Form.Control
+                          type="text"
+                          placeholder="John"
+                          {...register("firstName", {
+                            required: "This field is required",
+                          })}
+                          isInvalid={!!errors.firstName}
+                          className="border-2"
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {errors.firstName?.message}
+                        </Form.Control.Feedback>
+                      </div>
+                    </Form.Group>
+                  </Col>
+
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="fw-semibold">Last Name</Form.Label>
+                      <div className="input-group">
+                        <span className="input-group-text bg-light">
+                          <FontAwesomeIcon
+                            icon={faUser}
+                            className="text-blue-700"
+                          />
+                        </span>
+                        <Form.Control
+                          type="text"
+                          placeholder="Doe"
+                          {...register("lastName", {
+                            required: "This field is required",
+                          })}
+                          isInvalid={!!errors.lastName}
+                          className="border-2"
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {errors.lastName?.message}
+                        </Form.Control.Feedback>
+                      </div>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Row className="mb-3">
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="fw-semibold">Email</Form.Label>
+                      <div className="input-group">
+                        <span className="input-group-text bg-light">
+                          <FontAwesomeIcon
+                            icon={faEnvelope}
+                            className="text-blue-700"
+                          />
+                        </span>
+                        <Form.Control
+                          type="email"
+                          placeholder="you@example.com"
+                          {...register("email", {
+                            required: "This field is required",
+                          })}
+                          isInvalid={!!errors.email}
+                          className="border-2"
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {errors.email?.message}
+                        </Form.Control.Feedback>
+                      </div>
+                    </Form.Group>
+                  </Col>
+
+                  <Col md={6}>
+                    <Form.Group className="mb-3">
+                      <Form.Label className="fw-semibold">Phone</Form.Label>
+                      <div className="input-group">
+                        <span className="input-group-text bg-light">
+                          <FontAwesomeIcon
+                            icon={faPhone}
+                            className="text-blue-700"
+                          />
+                        </span>
+                        <Form.Control
+                          type="tel"
+                          placeholder="+84 000 000 000"
+                          {...register("phone", {
+                            required: "This field is required",
+                          })}
+                          isInvalid={!!errors.phone}
+                          className="border-2"
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {errors.phone?.message}
+                        </Form.Control.Feedback>
+                      </div>
+                    </Form.Group>
+                  </Col>
+                </Row>
+
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold">Password</Form.Label>
+                  <div className="input-group">
+                    <span className="input-group-text bg-light">
+                      <FontAwesomeIcon
+                        icon={faLock}
+                        className="text-blue-700"
+                      />
+                    </span>
+                    <Form.Control
+                      type="password"
+                      placeholder="••••••••"
+                      {...register("password", {
+                        required: "This field is required",
+                        minLength: {
+                          value: 6,
+                          message: "Password must be at least 6 characters",
+                        },
+                      })}
+                      isInvalid={!!errors.password}
+                      className="border-2"
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.password?.message}
+                    </Form.Control.Feedback>
+                  </div>
+                </Form.Group>
+
+                <Form.Group className="mb-4">
+                  <Form.Label className="fw-semibold">
+                    Confirm Password
+                  </Form.Label>
+                  <div className="input-group">
+                    <span className="input-group-text bg-light">
+                      <FontAwesomeIcon
+                        icon={faLock}
+                        className="text-blue-700"
+                      />
+                    </span>
+                    <Form.Control
+                      type="password"
+                      placeholder="••••••••"
+                      {...register("confirmPassword", {
+                        validate: (val) => {
+                          if (!val) {
+                            return "This field is required";
+                          } else if (watch("password") !== val) {
+                            return "Your passwords do no match";
+                          }
+                        },
+                      })}
+                      isInvalid={!!errors.confirmPassword}
+                      className="border-2 "
+                    />
+                    <Form.Control.Feedback type="invalid">
+                      {errors.confirmPassword?.message}
+                    </Form.Control.Feedback>
+                  </div>
+                </Form.Group>
+
+                <Alert variant="info" className="mb-4 border-2 bg-blue-100">
+                  By creating an account, you agree to our Terms of Service and
+                  Privacy Policy.
+                </Alert>
+
+                <div className="d-grid gap-2">
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    type="submit"
+                    className="mb-3 fw-bold py-3 text-white border-0 bg-blue-700"
+                    style={{
+                      boxShadow:
+                        "0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08)",
+                      transition: "transform 0.2s ease",
+                    }}
+                  >
+                    Create Account
+                  </Button>
+                </div>
+
+                <p className="text-center text-muted mb-0">
+                  Already have an account?{" "}
+                  <a
+                    href="/sign-in"
+                    className="text-blue-700 text-decoration-none fw-bold"
+                  >
+                    Sign in
+                  </a>
+                </p>
+              </Form>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 

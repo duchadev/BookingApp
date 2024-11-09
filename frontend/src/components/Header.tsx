@@ -24,6 +24,14 @@ const Header = () => {
                 >
                   My Bookings
                 </Link>
+                {role === "admin" && (
+                  <Link
+                    className="flex items-center text-white px-3 font-bold hover:bg-blue-500"
+                    to="/admin/dashboard"
+                  >
+                    Dashboard
+                  </Link>
+                )}
                 <SignOutButton />
               </>
             ) : (

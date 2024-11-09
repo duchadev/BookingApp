@@ -9,7 +9,7 @@ import { MenuItem } from "primereact/menuitem";
 import { Toast } from "primereact/toast";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
-import { HotelType } from "../../../src/shared/types";
+import { HotelType } from "../shared/types";
 import { BookingType } from "../shared/types";
 import { Tag } from "primereact/tag";
 import { format } from "date-fns";

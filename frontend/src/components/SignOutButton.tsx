@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "react-query";
 import * as apiClient from "../api-client";
 import { useAppContext } from "../contexts/AppContext";
 import { useNavigate } from "react-router-dom";
+import { LogOut } from "lucide-react";
 
 const SignOutButton = () => {
   const queryClient = useQueryClient();
@@ -26,8 +27,9 @@ const SignOutButton = () => {
   return (
     <button
       onClick={handleClick}
-      className="text-blue-600 px-3 font-bold bg-white hover:bg-gray-100 "
+      className="flex items-center bg-white-500 text-blue hover:bg-white hover:text-black p-2 px-3 rounded-full font-bold  transition-colors duration-200"
     >
+      <LogOut size={24} className="mr-2" />
       Sign Out
     </button>
   );
