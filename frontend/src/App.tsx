@@ -72,7 +72,7 @@ const App = () => {
         reset-password
         <Route path="/reset-password" element={<ResetPassword />} />
        
-        <Route path="/become-hotel-manager" element={<BecomeHotelManager />} />
+   
         {/* Protected Routes based on roles */}
         <Route
           path="/hotel/:hotelId/booking"

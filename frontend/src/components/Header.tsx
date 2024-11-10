@@ -1,11 +1,25 @@
-import { Link } from "react-router-dom";
+import { Link,useNavigate  } from "react-router-dom";
 import SignOutButton from "./SignOutButton";
 import Fchat from "./Fchat";
-
+import { registerAsManager,fetchCurrentUser } from '../api-client';
+import { useAppContext } from "../contexts/AppContext";
 const Header = () => {
   const isLoggedIn = localStorage.getItem("isLoggedIn");
   const role = localStorage.getItem("role");
-  // const { isLoggedIn } = useAppContext();
+   const { showToast } = useAppContext();
+    const navigate = useNavigate();
+const handleRegisterAsManager = async () => {
+  try {
+  
+    const currentUser = await fetchCurrentUser();
+    const userID = currentUser._id;
+      const response = await registerAsManager(userID);
+      showToast({ message: "Register successfully!", type: "SUCCESS" });
+      navigate("/"); // Optionally redirect on success
+    } catch (error) {
+       showToast({ message: "Fail to become hotel manager", type: "ERROR" });
+    }
+  };
 
   return (
     <div className="bg-blue-500 py-6">
@@ -24,12 +38,13 @@ const Header = () => {
         >
           My Bookings
                 </Link>
-                <Link
-          className="flex items-center text-white px-3 font-bold hover:bg-yellow-500"
-          to="/become-hotel-manager"
-        >
-          Become Hotel Manager!
-        </Link>
+                
+<button
+                  onClick={handleRegisterAsManager}
+                  className="flex items-center text-white px-3 font-bold bg-yellow-500 hover:bg-yellow-600"
+                >
+                  Become Hotel Manager!
+                </button>
         <SignOutButton />
       </>
     ) : role === "admin" ? (

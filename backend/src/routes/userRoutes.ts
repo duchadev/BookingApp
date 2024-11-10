@@ -276,7 +276,7 @@ usersRouter.post("/register-manager", async (req: Request, res: Response) => {
   const { userID } = req.body;
 
   try {
-    const user = await User.findById({ userID });
+    const user = await User.findById(userID);
 
     if (!user) {
       return res.status(400).json({ message: "User not found!" });
