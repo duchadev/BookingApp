@@ -11,10 +11,10 @@ import {
 import axios from "axios";
 const VITE_BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_BASE_URL;
 interface UpdateHotelStatusData {
-  action: 'approve' | 'reject'; 
+  action: "approve" | "reject";
 }
 interface UpdateUserReqData {
-  action: 'approve' | 'reject'; 
+  action: "approve" | "reject";
 }
 export const fetchCurrentUser = async (): Promise<UserType> => {
   const response = await fetch(`${VITE_BACKEND_BASE_URL}/api/users/me`, {
@@ -615,12 +615,12 @@ export const addBooking = async (bookingData: any) => {
 };
 export const fetchBookings = async () => {
   const response = await fetch(`${VITE_BACKEND_BASE_URL}/api/bookings`, {
-      credentials: "include",
+    credentials: "include",
   });
   if (!response.ok) {
-      throw new Error("Error fetching bookings");
+    throw new Error("Error fetching bookings");
   }
-  return response.json();  
+  return response.json();
 };
 export const fetchUsers = async () => {
   const response = await fetch(`${VITE_BACKEND_BASE_URL}/api/admin/users`);
@@ -631,8 +631,8 @@ export const fetchUsers = async () => {
 };
 
 export const getHotels = async (verifyStatus?: string) => {
-  const url = verifyStatus 
-    ? `${VITE_BACKEND_BASE_URL}/api/admin/verify?verify=${verifyStatus}` 
+  const url = verifyStatus
+    ? `${VITE_BACKEND_BASE_URL}/api/admin/verify?verify=${verifyStatus}`
     : `${VITE_BACKEND_BASE_URL}/api/admin/verify`;
 
   const response = await fetch(url, {
@@ -648,39 +648,49 @@ export const getHotels = async (verifyStatus?: string) => {
   return data;
 };
 // Make sure this function exists in api-client.js
-export const updateHotelStatus = async (hotelId: string, data: UpdateHotelStatusData) => {
-  const response = await fetch(`${VITE_BACKEND_BASE_URL}/api/admin/${hotelId}/verify`, {
-      method: 'PATCH',
+export const updateHotelStatus = async (
+  hotelId: string,
+  data: UpdateHotelStatusData
+) => {
+  const response = await fetch(
+    `${VITE_BACKEND_BASE_URL}/api/admin/${hotelId}/verify`,
+    {
+      method: "PATCH",
       headers: {
-          'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
-      credentials: 'include' // This ensures cookies are sent with the request
-  });
+      credentials: "include", // This ensures cookies are sent with the request
+    }
+  );
 
   // Log the response status and body for debugging
   console.log("Response status:", response.status);
-  
+
   // Attempt to parse the response as JSON
   let responseData;
   try {
-      responseData = await response.json();
-      console.log("Response data:", responseData);
+    responseData = await response.json();
+    console.log("Response data:", responseData);
   } catch (err) {
-      console.error("Failed to parse JSON response", err);
-      throw new Error('Failed to parse response data');
+    console.error("Failed to parse JSON response", err);
+    throw new Error("Failed to parse response data");
   }
 
   // Check if the response is okay
   if (!response.ok) {
-      throw new Error(`Failed to update hotel status: ${responseData.message || response.statusText}`);
+    throw new Error(
+      `Failed to update hotel status: ${
+        responseData.message || response.statusText
+      }`
+    );
   }
 
   return responseData; // Return the parsed response data if needed
 };
 export const getUserReqs = async (verifyStatus?: string) => {
-  const url = verifyStatus 
-    ? `${VITE_BACKEND_BASE_URL}/api/admin/verifyUserRequest?verify=${verifyStatus}` 
+  const url = verifyStatus
+    ? `${VITE_BACKEND_BASE_URL}/api/admin/verifyUserRequest?verify=${verifyStatus}`
     : `${VITE_BACKEND_BASE_URL}/api/admin/verifyUserRequest`;
 
   const response = await fetch(url, {
@@ -695,33 +705,169 @@ export const getUserReqs = async (verifyStatus?: string) => {
   console.log("Fetched User Request:", data); // Debugging response structure
   return data;
 };
-export const updateUserRole = async (userId: string, data: UpdateUserReqData) => {
-  const response = await fetch(`${VITE_BACKEND_BASE_URL}/api/admin/${userId}/verifyUserRequest`, {
-      method: 'PATCH',
+export const updateUserRole = async (
+  userId: string,
+  data: UpdateUserReqData
+) => {
+  const response = await fetch(
+    `${VITE_BACKEND_BASE_URL}/api/admin/${userId}/verifyUserRequest`,
+    {
+      method: "PATCH",
       headers: {
-          'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
-      credentials: 'include' // This ensures cookies are sent with the request
-  });
+      credentials: "include", // This ensures cookies are sent with the request
+    }
+  );
 
   // Log the response status and body for debugging
   console.log("Response status:", response.status);
-  
+
   // Attempt to parse the response as JSON
   let responseData;
   try {
-      responseData = await response.json();
-      console.log("Response data:", responseData);
+    responseData = await response.json();
+    console.log("Response data:", responseData);
   } catch (err) {
-      console.error("Failed to parse JSON response", err);
-      throw new Error('Failed to parse response data');
+    console.error("Failed to parse JSON response", err);
+    throw new Error("Failed to parse response data");
   }
 
   // Check if the response is okay
   if (!response.ok) {
-      throw new Error(`Failed to update user role: ${responseData.message || response.statusText}`);
+    throw new Error(
+      `Failed to update user role: ${
+        responseData.message || response.statusText
+      }`
+    );
   }
 
   return responseData; // Return the parsed response data if needed
+};
+export const requestPasswordReset = async (data: { email: string }) => {
+  const response = await axios.post(
+    `${VITE_BACKEND_BASE_URL}/api/users/forgot-password`,
+    data
+  );
+  return response.data;
+};
+export const resetPassword = async (data: {
+  token: string;
+  newPassword: string;
+}) => {
+  const response = await axios.post(
+    `${VITE_BACKEND_BASE_URL}/api/users/reset-password`,
+    data
+  );
+  return response.data;
+};
+
+export const registerAsManager = async (userID: string): Promise<any> => {
+  try {
+    const response = await fetch(
+      `${VITE_BACKEND_BASE_URL}/api/users/register-manager`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userID }),
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to register as manager");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error registering as manager:", error);
+    throw error;
+  }
+};
+
+//update profile
+export const validateOldPassword = async (
+  currentPassword: string,
+  userId: string
+) => {
+  const response = await fetch(
+    `${VITE_BACKEND_BASE_URL}/api/users/api/validateOldPassword`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId, currentPassword }),
+    }
+  );
+
+  if (!response.ok) {
+    console.log(userId);
+    console.log(currentPassword);
+    throw new Error("Mật khẩu hiện tại không chính xác ");
+  }
+
+  return response.json();
+};
+
+export const changePassword = async (
+  userId: string,
+  newPassword: string,
+  confirmPassword: string
+) => {
+  const response = await fetch(
+    `${VITE_BACKEND_BASE_URL}/api/users/api/changePassword`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId, newPassword, confirmPassword }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Không thể thay đổi mật khẩu");
+  }
+
+  return response.json();
+};
+export const updateUserProfile = async (
+  updatedData: Partial<UserType>
+): Promise<UserType> => {
+  const response = await fetch(
+    `${VITE_BACKEND_BASE_URL}/api/users/profile/update`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedData),
+      credentials: "include",
+    }
+  );
+
+  console.log("Trạng thái phản hồi:", response.status);
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Nội dung lỗi:", errorText);
+    alert("Số điện thoại đã tồn tại");
+    throw new Error(
+      `Không thể cập nhật hồ sơ: ${errorText || response.statusText}`
+    );
+  }
+
+  try {
+    const responseData = await response.json();
+    console.log("Dữ liệu phản hồi:", responseData);
+    return responseData;
+  } catch (err) {
+    console.error("Không thể phân tích phản hồi JSON", err);
+    throw new Error("Không thể phân tích dữ liệu phản hồi");
+  }
 };

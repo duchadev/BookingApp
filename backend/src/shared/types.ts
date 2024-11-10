@@ -12,6 +12,8 @@ export type UserType = {
   verificationToken?: string;
   isVerified: boolean;
   status: "Active" | "Inactive" | "Banned"; // user status
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
 };
 
 // RoomType Schema

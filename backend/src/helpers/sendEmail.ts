@@ -37,3 +37,15 @@ export async function sendVerificationEmail(userEmail: string, token: string) {
 </body>`,
   });
 }
+export async function sendResetPasswordEmail(userEmail: string, token: string) {
+  const resetUrl = `${BACKEND_URL}/api/users/reset-password?token=${token}`;
+
+  await transporter.sendMail({
+    from: '"Hotel Haven" <yourapp@example.com>',
+    to: userEmail,
+    subject: "Password Reset Request",
+    html: `<p>You requested a password reset. Click the link below to reset your password:</p>
+           <a href="${resetUrl}">Reset Password</a>
+           <p>This link will expire in 1 hour. If you did not request a password reset, please ignore this email.</p>`,
+  });
+}

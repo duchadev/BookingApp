@@ -203,6 +203,7 @@ hotelRouter.post(
         ...req.body,
         userId: req.userId, // req.userId được xác định bởi middleware verifyToken
         imageUrls: [],
+        verify: "Pending",
       };
 
       if (imageFiles || imageFiles.length > 0) {
@@ -384,12 +385,10 @@ hotelRouter.delete(
         .json({ message: "Hotel and all related data deleted successfully" });
     } catch (error) {
       console.error(error);
-      res
-        .status(500)
-        .json({
-          message: "Error deleting hotel and related data",
-          error: error.message,
-        });
+      res.status(500).json({
+        message: "Error deleting hotel and related data",
+        error: error.message,
+      });
     }
   }
 );
