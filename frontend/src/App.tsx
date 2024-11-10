@@ -33,7 +33,8 @@ import Dashboard from "./pages/Dashboard";
 import MyBookingDetails from "./pages/MyBookingDetails";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPasswordForm";
-import BecomeHotelManager from "./components/BecomeHotelManager";
+import Profile from "./pages/Profile";
+
 
 const App = () => {
   return (
@@ -71,7 +72,16 @@ const App = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         reset-password
         <Route path="/reset-password" element={<ResetPassword />} />
-       
+       <Route
+          path="/my-profile"
+          element={
+            <ProtectedRoute roles={["user", "hotel_manager", "admin"]}>
+              <Layout>
+                <Profile/>
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
    
         {/* Protected Routes based on roles */}
         <Route

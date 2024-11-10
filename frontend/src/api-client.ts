@@ -788,3 +788,86 @@ export const registerAsManager = async (userID: string): Promise<any> => {
     throw error;
   }
 };
+
+//update profile
+export const validateOldPassword = async (
+  currentPassword: string,
+  userId: string
+) => {
+  const response = await fetch(
+    `${VITE_BACKEND_BASE_URL}/api/users/api/validateOldPassword`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId, currentPassword }),
+    }
+  );
+
+  if (!response.ok) {
+    console.log(userId);
+    console.log(currentPassword);
+    throw new Error("Mật khẩu hiện tại không chính xác ");
+  }
+
+  return response.json();
+};
+
+export const changePassword = async (
+  userId: string,
+  newPassword: string,
+  confirmPassword: string
+) => {
+  const response = await fetch(
+    `${VITE_BACKEND_BASE_URL}/api/users/api/changePassword`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId, newPassword, confirmPassword }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Không thể thay đổi mật khẩu");
+  }
+
+  return response.json();
+};
+export const updateUserProfile = async (
+  updatedData: Partial<UserType>
+): Promise<UserType> => {
+  const response = await fetch(
+    `${VITE_BACKEND_BASE_URL}/api/users/profile/update`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedData),
+      credentials: "include",
+    }
+  );
+
+  console.log("Trạng thái phản hồi:", response.status);
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Nội dung lỗi:", errorText);
+    alert("Số điện thoại đã tồn tại");
+    throw new Error(
+      `Không thể cập nhật hồ sơ: ${errorText || response.statusText}`
+    );
+  }
+
+  try {
+    const responseData = await response.json();
+    console.log("Dữ liệu phản hồi:", responseData);
+    return responseData;
+  } catch (err) {
+    console.error("Không thể phân tích phản hồi JSON", err);
+    throw new Error("Không thể phân tích dữ liệu phản hồi");
+  }
+};

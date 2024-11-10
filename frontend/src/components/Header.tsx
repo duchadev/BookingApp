@@ -29,7 +29,8 @@ const handleRegisterAsManager = async () => {
           <Link to="/">Hotel Haven</Link>
         </span>
        <span className="flex space-x-2">
-  {isLoggedIn ? (
+          {isLoggedIn ? (
+           
     role === "user" ? (
       <>
         <Link
@@ -39,12 +40,13 @@ const handleRegisterAsManager = async () => {
           My Bookings
                 </Link>
                 
-<button
-                  onClick={handleRegisterAsManager}
-                  className="flex items-center text-white px-3 font-bold bg-yellow-500 hover:bg-yellow-600"
-                >
-                  Become Hotel Manager!
-                </button>
+
+                 <Link
+                className="flex items-center text-white px-3 font-bold hover:bg-blue-500"
+                to="/my-profile"
+              >
+                My Profile
+              </Link>
         <SignOutButton />
       </>
     ) : role === "admin" ? (
@@ -74,7 +76,8 @@ const handleRegisterAsManager = async () => {
       className="flex bg-white items-center text-blue-600 px-3 font-bold hover:bg-gray-100"
     >
       Sign In
-    </Link>
+              </Link>
+              
   )}
 </span>
 

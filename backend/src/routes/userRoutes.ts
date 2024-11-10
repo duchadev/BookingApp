@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { check, validationResult } from "express-validator";
 import { verifyToken } from "../middleware/auth";
 import * as crypto from "crypto";
+import bcrypt from "bcryptjs";
 import {
   sendVerificationEmail,
   sendResetPasswordEmail,
@@ -297,4 +298,106 @@ usersRouter.post("/register-manager", async (req: Request, res: Response) => {
       .json({ message: "Something went wrong", error: error.message });
   }
 });
+
+// update user's profile
+usersRouter.put(
+  "/profile/update",
+  verifyToken,
+  [
+    check("firstName", "First Name is required").optional().isString(),
+    check("lastName", "Last Name is required").optional().isString(),
+    check("phone", "Phone is required")
+      .optional()
+      .isString()
+      .isMobilePhone("vi-VN")
+      .withMessage("Invalid phone number format!"),
+    check("email", "Email is required").optional().isEmail(),
+  ],
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ message: errors.array() });
+    }
+
+    try {
+      const { phone } = req.body;
+      const userId = req.userId; // Lấy ID từ token
+
+      // Kiểm tra nếu số điện thoại đã tồn tại trên database
+      if (phone) {
+        const existingUser = await User.findOne({
+          phone,
+          _id: { $ne: userId },
+        });
+        if (existingUser) {
+          return res
+            .status(400)
+            .json({ message: "Số điện thoại đã được sử dụng" });
+        }
+      }
+
+      // Cập nhật thông tin người dùng
+      const updatedData = req.body;
+      const user = await User.findByIdAndUpdate(userId, updatedData, {
+        new: true,
+        runValidators: true,
+      }).select("-password");
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json(user);
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ message: "Something went wrong", error: error.message });
+    }
+  }
+);
+
+usersRouter.post("/api/validateOldPassword", async (req, res) => {
+  const { userId, currentPassword } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user)
+      return res.status(404).json({ message: "Người dùng không tồn tại" });
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ message: "Mật khẩu hiện tại không chính xác" });
+    }
+
+    res.status(200).json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: "Lỗi server", error });
+  }
+});
+usersRouter.post("/api/changePassword", async (req, res) => {
+  const { userId, newPassword, confirmPassword } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "Người dùng không tồn tại" });
+    }
+    if (newPassword !== confirmPassword) {
+      return res
+        .status(400)
+        .json({ message: "Mật khẩu mới và xác nhận mật khẩu không khớp" });
+    }
+
+    user.password = newPassword; // Đặt trực tiếp newPassword vào user.password
+    await user.save(); // Middleware sẽ tự động mã hóa trước khi lưu
+    res.status(200).json({ message: "Mật khẩu đã được thay đổi thành công" });
+  } catch (error) {
+    console.error("Lỗi khi thay đổi mật khẩu:", error);
+    res.status(500).json({ message: "Lỗi server", error });
+  }
+});
+
 export default usersRouter;
