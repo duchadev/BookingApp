@@ -725,3 +725,20 @@ export const updateUserRole = async (userId: string, data: UpdateUserReqData) =>
 
   return responseData; // Return the parsed response data if needed
 };
+export const requestPasswordReset = async (data: { email: string }) => {
+  const response = await axios.post(
+    `${VITE_BACKEND_BASE_URL}/api/users/forgot-password`,
+    data
+  );
+  return response.data;
+};
+export const resetPassword = async (data: {
+  token: string;
+  newPassword: string;
+}) => {
+  const response = await axios.post(
+    `${VITE_BACKEND_BASE_URL}/api/users/reset-password`,
+    data
+  );
+  return response.data;
+};

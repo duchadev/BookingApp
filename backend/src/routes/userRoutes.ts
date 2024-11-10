@@ -3,7 +3,10 @@ import jwt from "jsonwebtoken";
 import { check, validationResult } from "express-validator";
 import { verifyToken } from "../middleware/auth";
 import * as crypto from "crypto";
-import { sendVerificationEmail } from "../helpers/sendEmail";
+import {
+  sendVerificationEmail,
+  sendResetPasswordEmail,
+} from "../helpers/sendEmail";
 import User from "../models/user";
 
 const FRONTEND_URL = process.env.FRONTEND_URL;
@@ -188,5 +191,110 @@ usersRouter.delete("/:id", async (req: Request, res: Response) => {
       .json({ message: "Something went wrong", error: error.message });
   }
 });
+usersRouter.post("/forgot-password", async (req: Request, res: Response) => {
+  const { email } = req.body;
 
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Email not found" });
+    }
+
+    // Generate a reset token and its expiration time
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour expiration
+    await user.save();
+
+    // Send reset password email
+    await sendResetPasswordEmail(user.email, resetToken);
+
+    res.status(200).json({
+      message: "Password reset link sent to your email.",
+    });
+    console.log("reset token", resetToken);
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong", error: error.message });
+  }
+});
+usersRouter.post("/reset-password", async (req: Request, res: Response) => {
+  const { token, newPassword } = req.body;
+
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: new Date() }, // Check if the token is still valid
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+
+    // Set the new password and clear the reset fields
+    user.password = newPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.status(200).json({ message: "Password has been reset successfully" });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong", error: error.message });
+  }
+});
+
+usersRouter.get("/reset-password", async (req: Request, res: Response) => {
+  const { token } = req.query;
+
+  try {
+    const user = await User.findOne({ resetPasswordToken: token });
+
+    if (!user) {
+      // return res.status(400).json({ message: "Invalid or expired token" });
+
+      // Redirect đến trang lỗi xác thực nếu token không hợp lệ
+      return res.redirect(`${FRONTEND_URL}/email-verification-failed`);
+    }
+
+    // res.status(200).json({ message: "Email verified successfully!" });
+    // Redirect đến trang xác thực thành công trên frontend
+    res.redirect(`${FRONTEND_URL}/reset-password?token=${token}`);
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong", error: error.message });
+  }
+});
+
+usersRouter.post("/register-manager", async (req: Request, res: Response) => {
+  const { userID } = req.body;
+
+  try {
+    const user = await User.findById({ userID });
+
+    if (!user) {
+      return res.status(400).json({ message: "User not found!" });
+    }
+
+    // Set the new password and clear the reset fields
+    user.wantToBeHotelManager = "Pending";
+
+    await user.save();
+
+    res
+      .status(200)
+      .json({ message: "Register to become manager successfully" });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ message: "Something went wrong", error: error.message });
+  }
+});
 export default usersRouter;
