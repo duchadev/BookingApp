@@ -227,10 +227,8 @@ hotelRouter.post(
 // Get all hotels (not by userID)
 hotelRouter.get("/", async (req: Request, res: Response) => {
   try {
-    // const hotels = await Hotel.find();
-
-    // Lấy danh sách các khách sạn dựa trên userId của người dùng đăng nhập
-    const hotels = await Hotel.find().lean();
+    // Lấy danh sách các khách sạn có verify = "Success"
+    const hotels = await Hotel.find({ verify: "Success" }).lean();
 
     // Sử dụng map để tìm tất cả các phòng liên quan đến từng khách sạn
     const hotelsWithRooms = await Promise.all(
@@ -245,8 +243,6 @@ hotelRouter.get("/", async (req: Request, res: Response) => {
 
     // Trả về danh sách hotels kèm theo rooms cho từng hotel
     res.status(200).json(hotelsWithRooms);
-
-    // res.json(hotels);
   } catch (error) {
     res
       .status(500)

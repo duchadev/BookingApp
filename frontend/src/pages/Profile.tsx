@@ -9,23 +9,23 @@ import { registerAsManager, fetchCurrentUser } from '../api-client';
 import { Link, useNavigate } from "react-router-dom";
 
 const Profile: React.FC = () => {
-    
-        const { showToast } = useAppContext();
-    const navigate = useNavigate();
-const handleRegisterAsManager = async () => {
-  try {
-  
-    const currentUser = await fetchCurrentUser();
-    const userID = currentUser._id;
-      const response = await registerAsManager(userID);
-      showToast({ message: "Register successfully!", type: "SUCCESS" });
+  const { showToast } = useAppContext();
+  const navigate = useNavigate();
+
+  const handleRegisterAsManager = async () => {
+    try {
+      const currentUser = await fetchCurrentUser();
+      const userID = currentUser._id;
+      await registerAsManager(userID);
+      showToast({ message: "Registered successfully!", type: "SUCCESS" });
       navigate("/"); // Optionally redirect on success
     } catch (error) {
-       showToast({ message: "Fail to become hotel manager", type: "ERROR" });
+      showToast({ message: "Failed to become a hotel manager", type: "ERROR" });
     }
   };
-  // Lấy thông tin người dùng từ API
-  const { data: userProfile, isLoading, refetch } = useQuery<UserType>('fetchUserProfile', apiClient.fetchCurrentUser);
+
+  // Fetch user profile data
+  const { data: userProfile, isLoading, refetch } = useQuery<UserType>('fetchUserProfile', fetchCurrentUser);
 
   if (isLoading) {
     return (
@@ -37,14 +37,17 @@ const handleRegisterAsManager = async () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <div className="flex justify-end mb-6">
-        <button
-          onClick={handleRegisterAsManager}
-          className="bg-yellow-500 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:bg-yellow-600 transition duration-300 ease-in-out transform hover:scale-105"
-        >
-          Become Hotel Manager!
-        </button>
-      </div>
+      {/* Display button only if the user's role is "user" */}
+      {userProfile?.role === 'user' && (
+        <div className="flex justify-end mb-6">
+          <button
+            onClick={handleRegisterAsManager}
+            className="bg-yellow-500 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:bg-yellow-600 transition duration-300 ease-in-out transform hover:scale-105"
+          >
+            Become Hotel Manager!
+          </button>
+        </div>
+      )}
       
       <h1 className="text-3xl font-bold mb-4">Profile Information</h1>
       <p className="text-gray-600 mb-6">Update your Information</p> 
