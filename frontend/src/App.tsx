@@ -29,6 +29,7 @@ import { HotelRoomTypeDetails } from "./pages/rooms/HotelRoomTypeDetails";
 import { HotelCustomerBookings } from "./pages/HotelCustomerBookings";
 import ManageUserReq from "./pages/ManageUserReq";
 import ManageHotels from "./pages/ManageHotels";
+import ManageBookings from "./pages/ManageBookings";
 import Dashboard from "./pages/Dashboard";
 import MyBookingDetails from "./pages/MyBookingDetails";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -222,6 +223,14 @@ const App = () => {
           element={
             <ProtectedRoute roles={["admin"]}>
               <ManageUserReq />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/manage-bookings"
+          element={
+            <ProtectedRoute roles={["admin"]}>
+              <ManageBookings />
             </ProtectedRoute>
           }
         />

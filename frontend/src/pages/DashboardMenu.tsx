@@ -46,8 +46,8 @@ const DashboardMenu = () => {
                     <i className="fas fa-users-cog"></i> Users Request
                 </Link>
 
-                <Link to="/admin/bookings" className={`nav-itemx ${location.pathname === "/" ? "active" : ""}`}>
-                    <i className="fas fa-shopping-cart"></i> Manage Booking
+                <Link to="/admin/manage-bookings" className={`nav-itemx ${location.pathname === "/admin/manage-bookings" ? "active" : ""}`}>
+                    <i className="fas fa-shopping-cart"></i> Manage Bookings
                 </Link>
             </nav>
         </div>
