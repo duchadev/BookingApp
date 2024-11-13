@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import SignOutButton from "./SignOutButton";
 import Fchat from "./Fchat";
-
+import { ChartNoAxesCombined, BookCheck  } from 'lucide-react';
 const Header = () => {
   const isLoggedIn = localStorage.getItem("isLoggedIn");
   const role = localStorage.getItem("role");
@@ -22,14 +22,15 @@ const Header = () => {
                   className="flex items-center text-white px-3 font-bold hover:bg-blue-500"
                   to="/my-bookings"
                 >
-                  My Bookings
+                  <BookCheck size={24} className="mr-2"/>My Bookings
                 </Link>
                 {role === "admin" && (
                   <Link
                     className="flex items-center text-white px-3 font-bold hover:bg-blue-500"
                     to="/admin/dashboard"
                   >
-                    Dashboard
+                        <ChartNoAxesCombined size={24} className="mr-2"/>
+                        Dashboard
                   </Link>
                 )}
                 <SignOutButton />

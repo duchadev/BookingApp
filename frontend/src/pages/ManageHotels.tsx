@@ -4,7 +4,7 @@ import { getHotels, updateHotelStatus } from '../api-client';
 import "../assets/css/manageHotels.css";
 import DashboardMenu from "./DashboardMenu";
 import AdminTopbar from '../components/AdminTopbar';
-
+import { toast } from 'react-toastify';
 interface Hotel {
     _id: string;
     name: string;
@@ -19,19 +19,20 @@ const ManageHotels: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
 
-    useEffect(() => {
+    const fetchHotels = async () => {
         const queryParams = new URLSearchParams(location.search);
         const verifyStatus = queryParams.get('verify') || 'Pending'; // Default to "Pending"
 
-        const fetchHotels = async () => {
-            try {
-                const response = await getHotels(verifyStatus); // Pass status to API call
-                setHotels(response);
-            } catch (error) {
-                console.error('Failed to fetch hotels', error);
-            }
-        };
+        try {
+            const response = await getHotels(verifyStatus); // Pass status to API call
+            setHotels(response);
+        } catch (error) {
+            console.error('Failed to fetch hotels', error);
+            setError('Failed to fetch hotels');
+        }
+    };
 
+    useEffect(() => {
         fetchHotels();
     }, [location.search]);
     const handleMoreInfo = (hotelId: string) => {
@@ -63,6 +64,11 @@ const ManageHotels: React.FC = () => {
                             h._id === selectedHotel._id ? { ...h, status: approved ? 'Approved' : 'Denied' } : h
                         )
                     );
+                      // Show success message
+                toast.success('Hotel status updated successfully!');
+
+                // Re-fetch hotels to reflect the updated list
+                fetchHotels();
                     setShowPopup(false);
                     setSelectedHotel(null);
                     console.log("Update successful");

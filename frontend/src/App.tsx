@@ -36,26 +36,32 @@ const App = () => {
         <Route
           path="/"
           element={
+            <ProtectedRoute roles={["user", "hotel_manager"]}>
             <Layout>
               <Home />
               <MailList />
             </Layout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/search"
           element={
+            <ProtectedRoute roles={["user", "hotel_manager"]}>
             <Layout>
               <Search />
             </Layout>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/detail/:hotelId"
           element={
+            <ProtectedRoute roles={["user", "hotel_manager"]}>
             <Layout>
               <Detail />
             </Layout>
+            </ProtectedRoute>
           }
         />
         <Route path="/register" element={<Register />} />
@@ -65,7 +71,7 @@ const App = () => {
         <Route
           path="/hotel/:hotelId/booking"
           element={
-            <ProtectedRoute roles={["user", "hotel_manager", "admin"]}>
+            <ProtectedRoute roles={["user", "hotel_manager"]}>
               <Layout>
                 <Booking />
               </Layout>
@@ -75,7 +81,7 @@ const App = () => {
         <Route
           path="/add-hotel"
           element={
-            <ProtectedRoute roles={["hotel_manager", "admin"]}>
+            <ProtectedRoute roles={["hotel_manager"]}>
               <Layout>
                 <AddHotel />
               </Layout>
@@ -105,7 +111,7 @@ const App = () => {
         <Route
           path="/hotel/:hotelId/rooms/types"
           element={
-            <ProtectedRoute roles={["hotel_manager", "admin"]}>
+            <ProtectedRoute roles={["hotel_manager"]}>
               <Layout>
                 <HotelRoomTypes />
               </Layout>
@@ -115,7 +121,7 @@ const App = () => {
         <Route
           path="/hotel/:hotelId/rooms/types/:roomType"
           element={
-            <ProtectedRoute roles={["hotel_manager", "admin"]}>
+            <ProtectedRoute roles={["hotel_manager"]}>
               <Layout>
                 <HotelRoomTypeDetails />
               </Layout>
@@ -125,7 +131,7 @@ const App = () => {
         <Route
           path="/hotel/:hotelId/rooms/add"
           element={
-            <ProtectedRoute roles={["hotel_manager", "admin"]}>
+            <ProtectedRoute roles={["hotel_manager"]}>
               <Layout>
                 <AddRoom />
               </Layout>
@@ -135,7 +141,7 @@ const App = () => {
         <Route
           path="/hotel/:hotelId/rooms/edit/:roomId"
           element={
-            <ProtectedRoute roles={["hotel_manager", "admin"]}>
+            <ProtectedRoute roles={["hotel_manager"]}>
               <Layout>
                 <EditRoom />
               </Layout>
@@ -145,7 +151,7 @@ const App = () => {
         <Route
           path="/my-bookings"
           element={
-            <ProtectedRoute roles={["user", "hotel_manager", "admin"]}>
+            <ProtectedRoute roles={["user", "hotel_manager"]}>
               <Layout>
                 <MyBookings />
               </Layout>

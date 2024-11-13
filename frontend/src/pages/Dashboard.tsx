@@ -64,7 +64,9 @@ const Dashboard = () => {
             const revenueData = bookings.map(booking => ({
                 date: booking.createdAt ? new Date(booking.createdAt).toLocaleDateString('en-GB') : 'N/A',
                 amount: booking.totalCost || 0
-            }));
+            }))
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); 
+            
 
             return {
                 totalUsers: userCount, // Use the user count from the response

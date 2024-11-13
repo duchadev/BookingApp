@@ -22,10 +22,16 @@ const SignIn = () => {
   } = useForm<SignInFormData>();
 
   const mutation = useMutation(apiClient.signIn, {
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       showToast({ message: "Sign in Successful!", type: "SUCCESS" });
       await queryClient.invalidateQueries("validateToken");
-      navigate(location.state?.from?.pathname || "/");
+      
+      const role = data.role; 
+      if (role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate(location.state?.from?.pathname || "/");
+      }
     },
     onError: (error: Error) => {
       showToast({ message: error.message, type: "ERROR" });
