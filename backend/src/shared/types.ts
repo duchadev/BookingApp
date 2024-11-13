@@ -12,6 +12,8 @@ export type UserType = {
   verificationToken?: string;
   isVerified: boolean;
   status: "Active" | "Inactive" | "Banned"; // user status
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
 };
 
 // RoomType Schema
@@ -53,7 +55,7 @@ export type BookingType = {
   _id: string;
   userId: UserType; // User making the booking
   hotelId: HotelType; // Hotel being booked
-  roomId: RoomType; // Specific room type being booked
+  roomIds: RoomType[]; // Specific room type being booked
   adultCount: number;
   childCount: number;
   checkIn: Date;

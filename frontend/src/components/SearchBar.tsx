@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useSearchContext } from "../contexts/SearchContext";
 import { MdTravelExplore } from "react-icons/md";
 import DatePicker from "react-datepicker";
@@ -37,6 +37,16 @@ const SearchBar = () => {
   const minDate = new Date();
   const maxDate = new Date();
   maxDate.setFullYear(maxDate.getFullYear() + 1);
+
+  // Cập nhật checkOut khi checkIn thay đổi
+  useEffect(() => {
+    if (checkIn) {
+      // Đảm bảo checkOut là ít nhất 1 ngày sau checkIn
+      const newCheckOut = new Date(checkIn);
+      newCheckOut.setDate(newCheckOut.getDate() + 1); // Thêm 1 ngày
+      setCheckOut(newCheckOut);
+    }
+  }, [checkIn]);
 
   return (
     <form
@@ -98,7 +108,7 @@ const SearchBar = () => {
           selectsStart
           startDate={checkIn}
           endDate={checkOut}
-          minDate={minDate}
+          minDate={checkIn} // Chỉ cho phép chọn ngày check-out sau check-in
           maxDate={maxDate}
           placeholderText="Check-out Date"
           className="min-w-full bg-white p-2 focus:outline-none"
@@ -116,6 +126,7 @@ const SearchBar = () => {
             setDestination("");
             setAdultCount(0);
             setChildCount(0);
+            setCheckIn(new Date());
           }}
         >
           <Eraser  size={24} className="mr-2"/>Clear

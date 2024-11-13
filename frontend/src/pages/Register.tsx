@@ -3,10 +3,24 @@ import { useMutation } from "react-query";
 import * as apiClient from "../api-client";
 import { useAppContext } from "../contexts/AppContext";
 import { useNavigate } from "react-router-dom";
-import { Container, Row, Col, Form, Button, Card, Alert } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faEnvelope, faPhone, faLock, faHotel } from '@fortawesome/free-solid-svg-icons';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import {
+  Container,
+  Row,
+  Col,
+  Form,
+  Button,
+  Card,
+  Alert,
+} from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faUser,
+  faEnvelope,
+  faPhone,
+  faLock,
+  faHotel,
+} from "@fortawesome/free-solid-svg-icons";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 export type RegisterFormData = {
   firstName: string;
@@ -58,7 +72,9 @@ const Register = () => {
                 <FontAwesomeIcon icon={faHotel} size="3x" />
               </div>
               <h2 className="fw-bold">Create your account</h2>
-              <p className="opacity-75">Join us to access exclusive hotel deals and manage your bookings</p>
+              <p className="opacity-75">
+                Join us to access exclusive hotel deals and manage your bookings
+              </p>
             </Card.Header>
 
             <Card.Body className="px-4 py-4">
@@ -66,17 +82,24 @@ const Register = () => {
                 <Row className="mb-3">
                   <Col md={6}>
                     <Form.Group className="mb-3">
-                      <Form.Label className="fw-semibold">First Name</Form.Label>
+                      <Form.Label className="fw-semibold">
+                        First Name
+                      </Form.Label>
                       <div className="input-group">
                         <span className="input-group-text bg-light">
-                          <FontAwesomeIcon icon={faUser} className="text-blue-700" />
+                          <FontAwesomeIcon
+                            icon={faUser}
+                            className="text-blue-700"
+                          />
                         </span>
                         <Form.Control
                           type="text"
                           placeholder="John"
-                          {...register("firstName", { required: "This field is required" })}
+                          {...register("firstName", {
+                            required: "This field is required",
+                          })}
                           isInvalid={!!errors.firstName}
-                          className="border-2 text-blue-100"
+                          className="border-2"
                         />
                         <Form.Control.Feedback type="invalid">
                           {errors.firstName?.message}
@@ -84,18 +107,23 @@ const Register = () => {
                       </div>
                     </Form.Group>
                   </Col>
-                  
+
                   <Col md={6}>
                     <Form.Group className="mb-3">
                       <Form.Label className="fw-semibold">Last Name</Form.Label>
                       <div className="input-group">
                         <span className="input-group-text bg-light">
-                          <FontAwesomeIcon icon={faUser} className="text-blue-700" />
+                          <FontAwesomeIcon
+                            icon={faUser}
+                            className="text-blue-700"
+                          />
                         </span>
                         <Form.Control
                           type="text"
                           placeholder="Doe"
-                          {...register("lastName", { required: "This field is required" })}
+                          {...register("lastName", {
+                            required: "This field is required",
+                          })}
                           isInvalid={!!errors.lastName}
                           className="border-2"
                         />
@@ -113,12 +141,17 @@ const Register = () => {
                       <Form.Label className="fw-semibold">Email</Form.Label>
                       <div className="input-group">
                         <span className="input-group-text bg-light">
-                          <FontAwesomeIcon icon={faEnvelope} className="text-blue-700" />
+                          <FontAwesomeIcon
+                            icon={faEnvelope}
+                            className="text-blue-700"
+                          />
                         </span>
                         <Form.Control
                           type="email"
                           placeholder="you@example.com"
-                          {...register("email", { required: "This field is required" })}
+                          {...register("email", {
+                            required: "This field is required",
+                          })}
                           isInvalid={!!errors.email}
                           className="border-2"
                         />
@@ -128,18 +161,23 @@ const Register = () => {
                       </div>
                     </Form.Group>
                   </Col>
-                  
+
                   <Col md={6}>
                     <Form.Group className="mb-3">
                       <Form.Label className="fw-semibold">Phone</Form.Label>
                       <div className="input-group">
                         <span className="input-group-text bg-light">
-                          <FontAwesomeIcon icon={faPhone} className="text-blue-700" />
+                          <FontAwesomeIcon
+                            icon={faPhone}
+                            className="text-blue-700"
+                          />
                         </span>
                         <Form.Control
                           type="tel"
                           placeholder="+84 000 000 000"
-                          {...register("phone", { required: "This field is required" })}
+                          {...register("phone", {
+                            required: "This field is required",
+                          })}
                           isInvalid={!!errors.phone}
                           className="border-2"
                         />
@@ -155,7 +193,10 @@ const Register = () => {
                   <Form.Label className="fw-semibold">Password</Form.Label>
                   <div className="input-group">
                     <span className="input-group-text bg-light">
-                      <FontAwesomeIcon icon={faLock} className="text-blue-700" />
+                      <FontAwesomeIcon
+                        icon={faLock}
+                        className="text-blue-700"
+                      />
                     </span>
                     <Form.Control
                       type="password"
@@ -177,10 +218,15 @@ const Register = () => {
                 </Form.Group>
 
                 <Form.Group className="mb-4">
-                  <Form.Label className="fw-semibold">Confirm Password</Form.Label>
+                  <Form.Label className="fw-semibold">
+                    Confirm Password
+                  </Form.Label>
                   <div className="input-group">
                     <span className="input-group-text bg-light">
-                      <FontAwesomeIcon icon={faLock} className="text-blue-700" />
+                      <FontAwesomeIcon
+                        icon={faLock}
+                        className="text-blue-700"
+                      />
                     </span>
                     <Form.Control
                       type="password"
@@ -204,18 +250,20 @@ const Register = () => {
                 </Form.Group>
 
                 <Alert variant="info" className="mb-4 border-2 bg-blue-100">
-                  By creating an account, you agree to our Terms of Service and Privacy Policy.
+                  By creating an account, you agree to our Terms of Service and
+                  Privacy Policy.
                 </Alert>
 
                 <div className="d-grid gap-2">
-                  <Button 
+                  <Button
                     variant="primary"
                     size="lg"
                     type="submit"
                     className="mb-3 fw-bold py-3 text-white border-0 bg-blue-700"
                     style={{
-                      boxShadow: '0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08)',
-                      transition: 'transform 0.2s ease',
+                      boxShadow:
+                        "0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08)",
+                      transition: "transform 0.2s ease",
                     }}
                   >
                     Create Account
@@ -223,8 +271,11 @@ const Register = () => {
                 </div>
 
                 <p className="text-center text-muted mb-0">
-                  Already have an account?{' '}
-                  <a href="/login" className="text-blue-700 text-decoration-none fw-bold">
+                  Already have an account?{" "}
+                  <a
+                    href="/sign-in"
+                    className="text-blue-700 text-decoration-none fw-bold"
+                  >
                     Sign in
                   </a>
                 </p>

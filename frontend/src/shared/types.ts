@@ -53,7 +53,7 @@ export type BookingType = {
   _id: string;
   userId: UserType; // User making the booking
   hotelId: HotelType; // Hotel being booked
-  roomId: RoomType; // Specific room type being booked
+  roomIds: RoomType[]; // Specific room type being booked
   adultCount: number;
   childCount: number;
   checkIn: Date;

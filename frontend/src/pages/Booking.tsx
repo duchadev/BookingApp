@@ -8,7 +8,8 @@ import BookingDetailsSummary from "../components/BookingDetailsSummary";
 const Booking = () => {
   const { hotelId } = useParams();
   const location = useLocation();
-  const { room, pricePerNight, checkIn, checkOut, adultCount, childCount } =
+
+  const { selectedRooms, checkIn, checkOut, adultCount, childCount } =
     location.state || {};
 
   const [numberOfNights, setNumberOfNights] = useState<number>(0);
@@ -17,7 +18,12 @@ const Booking = () => {
     if (checkIn && checkOut) {
       const msInADay = 1000 * 60 * 60 * 24;
       const nights = (checkOut.getTime() - checkIn.getTime()) / msInADay;
-      setNumberOfNights(Math.ceil(nights));
+      // setNumberOfNights(Math.ceil(nights));
+
+      // Lấy số nguyên phần nguyên (đếm số đêm)
+      const numberOfNights = nights > 0 ? Math.floor(nights) : 0;
+
+      setNumberOfNights(numberOfNights);
     }
   }, [checkIn, checkOut]);
 
@@ -47,8 +53,7 @@ const Booking = () => {
         childCount={childCount}
         numberOfNights={numberOfNights}
         hotel={hotel}
-        roomSeleted={room}
-        pricePerNight={pricePerNight}
+        selectedRooms={selectedRooms}
         currentUser={currentUser}
       />
       <div className="ml-7">

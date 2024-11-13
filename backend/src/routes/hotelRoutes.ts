@@ -9,6 +9,8 @@ import { BookingType, HotelSearchResponse } from "../shared/types";
 import { param, validationResult } from "express-validator";
 import { uploadImages } from "../helpers/uploadFile";
 import Room from "../models/Room";
+import Booking from "../models/Booking";
+import Feedback from "../models/feedback";
 
 const hotelRouter = express.Router();
 
@@ -90,8 +92,8 @@ const constructSearchQuery = (queryParams: any) => {
       { destination: { $regex: new RegExp(queryParams.destination, "i") } },
     ];
   }
-  console.log("Received adultCount:", queryParams.adultCount);
-  console.log("Received childCount:", queryParams.childCount);
+  console.log("Received adultCount:", queryParams.checkIn);
+  console.log("Received childCount:", queryParams.checkOut);
 
   if (queryParams.childCount) {
     constructedQuery.maxChildCount = {
@@ -129,6 +131,21 @@ const constructSearchQuery = (queryParams: any) => {
       : [parseInt(queryParams.stars, 10)];
 
     constructedQuery.starRating = { $in: starRatings };
+  }
+
+  if (queryParams.checkIn && queryParams.checkOut) {
+    const checkInDate = new Date(queryParams.checkIn);
+    const checkOutDate = new Date(queryParams.checkOut);
+
+    // Tìm phòng không bị xung đột với khoảng thời gian đã đặt
+    constructedQuery["status"] = {
+      $not: {
+        $elemMatch: {
+          checkIn: { $lt: checkOutDate }, // Ngày bắt đầu trước ngày người dùng check-out
+          checkOut: { $gt: checkInDate }, // Ngày kết thúc sau ngày người dùng check-in
+        },
+      },
+    };
   }
 
   return constructedQuery;
@@ -186,6 +203,7 @@ hotelRouter.post(
         ...req.body,
         userId: req.userId, // req.userId được xác định bởi middleware verifyToken
         imageUrls: [],
+        verify: "Pending",
       };
 
       if (imageFiles || imageFiles.length > 0) {
@@ -209,10 +227,8 @@ hotelRouter.post(
 // Get all hotels (not by userID)
 hotelRouter.get("/", async (req: Request, res: Response) => {
   try {
-    // const hotels = await Hotel.find();
-
-    // Lấy danh sách các khách sạn dựa trên userId của người dùng đăng nhập
-    const hotels = await Hotel.find().lean();
+    // Lấy danh sách các khách sạn có verify = "Success"
+    const hotels = await Hotel.find({ verify: "Success" }).lean();
 
     // Sử dụng map để tìm tất cả các phòng liên quan đến từng khách sạn
     const hotelsWithRooms = await Promise.all(
@@ -227,8 +243,6 @@ hotelRouter.get("/", async (req: Request, res: Response) => {
 
     // Trả về danh sách hotels kèm theo rooms cho từng hotel
     res.status(200).json(hotelsWithRooms);
-
-    // res.json(hotels);
   } catch (error) {
     res
       .status(500)
@@ -339,140 +353,40 @@ hotelRouter.delete(
   verifyToken,
   authorizeRoles("hotel_manager", "admin"),
   async (req: Request, res: Response) => {
-    const id = req.params.hotelId.toString();
+    const hotelId = req.params.hotelId.toString();
+
     try {
-      // Tìm và xóa hotel
+      // Step 1: Delete related rooms
+      await Room.deleteMany({ hotelId });
+
+      // Step 2: Delete related bookings
+      await Booking.deleteMany({ hotelId });
+
+      // Step 3: Delete related feedbacks
+      await Feedback.deleteMany({ hotelId });
+
+      // Step 4: Delete the hotel
       const deletedHotel = await Hotel.findOneAndDelete({
-        _id: id,
-        // userId: req.userId, // Có thể bỏ qua hoặc giữ lại nếu muốn xác thực người dùng xóa
+        _id: hotelId,
+        // Optionally, you can also validate the user who is deleting this hotel
+        // userId: req.userId,
       });
 
       if (!deletedHotel) {
         return res.status(404).json({ message: "Hotel not found" });
       }
 
-      res.status(200).json({ message: "Hotel deleted successfully" });
-    } catch (error) {
       res
-        .status(500)
-        .json({ message: "Error deleting hotel", error: error.message });
+        .status(200)
+        .json({ message: "Hotel and all related data deleted successfully" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: "Error deleting hotel and related data",
+        error: error.message,
+      });
     }
   }
 );
-
-// -------------------------------
-
-// hotelRouter.get(
-//   "/:id",
-//   [param("id").notEmpty().withMessage("Hotel ID is required")],
-//   async (req: Request, res: Response) => {
-//     const errors = validationResult(req);
-//     if (!errors.isEmpty()) {
-//       return res.status(400).json({ errors: errors.array() });
-//     }
-
-//     const id = req.params.id.toString();
-
-//     try {
-//       const hotel = await Hotel.findById(id);
-//       res.json(hotel);
-//     } catch (error) {
-//       console.log(error);
-//       res.status(500).json({ message: "Error fetching hotel" });
-//     }
-//   }
-// );
-
-// hotelRouter.post(
-//   "/:hotelId/bookings/payment-intent",
-//   verifyToken,
-//   async (req: Request, res: Response) => {
-//     const { numberOfNights } = req.body;
-//     const hotelId = req.params.hotelId;
-
-//     const hotel = await Hotel.findById(hotelId);
-//     if (!hotel) {
-//       return res.status(400).json({ message: "Hotel not found" });
-//     }
-
-//     // const totalCost = hotel.pricePerNight * numberOfNights;
-
-//     // const paymentIntent = await stripe.paymentIntents.create({
-//     //   amount: totalCost * 100,
-//     //   currency: "gbp",
-//     //   metadata: {
-//     //     hotelId,
-//     //     userId: req.userId,
-//     //   },
-//     // });
-
-//     // if (!paymentIntent.client_secret) {
-//     //   return res.status(500).json({ message: "Error creating payment intent" });
-//     // }
-
-//     // const response = {
-//     //   paymentIntentId: paymentIntent.id,
-//     //   clientSecret: paymentIntent.client_secret.toString(),
-//     //   totalCost,
-//     // };
-
-//     // res.send(response);
-
-//     res.status(200).json({ message: "Chưa update phần thanh toán..." });
-//   }
-// );
-
-// hotelRouter.post(
-//   "/:hotelId/bookings",
-//   verifyToken,
-//   async (req: Request, res: Response) => {
-//     try {
-//       // const paymentIntentId = req.body.paymentIntentId;
-
-//       // const paymentIntent = await stripe.paymentIntents.retrieve(
-//       //   paymentIntentId as string
-//       // );
-
-//       // if (!paymentIntent) {
-//       //   return res.status(400).json({ message: "payment intent not found" });
-//       // }
-
-//       // if (
-//       //   paymentIntent.metadata.hotelId !== req.params.hotelId ||
-//       //   paymentIntent.metadata.userId !== req.userId
-//       // ) {
-//       //   return res.status(400).json({ message: "payment intent mismatch" });
-//       // }
-
-//       // if (paymentIntent.status !== "succeeded") {
-//       //   return res.status(400).json({
-//       //     message: `payment intent not succeeded. Status: ${paymentIntent.status}`,
-//       //   });
-//       // }
-
-//       const newBooking: BookingType = {
-//         ...req.body,
-//         userId: req.userId,
-//       };
-
-//       const hotel = await Hotel.findOneAndUpdate(
-//         { _id: req.params.hotelId },
-//         {
-//           $push: { bookings: newBooking },
-//         }
-//       );
-
-//       if (!hotel) {
-//         return res.status(400).json({ message: "hotel not found" });
-//       }
-
-//       await hotel.save();
-//       res.status(200).send();
-//     } catch (error) {
-//       console.log(error);
-//       res.status(500).json({ message: "something went wrong" });
-//     }
-//   }
-// );
 
 export default hotelRouter;

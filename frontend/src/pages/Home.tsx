@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import * as apiClient from "../api-client";
 import "../assets/css/home.css";
 import Featured from "../components/Featured";
@@ -17,54 +17,97 @@ const Home = () => {
   // Get the status from query parameters
   const query = new URLSearchParams(location.search);
   const status = query.get("status"); // CANCELLED or PAID
-  const orderCode = query.get("orderCode");
+
+  const mutation = useMutation(apiClient.addBooking);
 
   const { data: hotels, isLoading } = useQuery<HotelType[] | undefined>(
     "fetchQuery",
     () => apiClient.fetchHotels()
   );
-  const bookingDetails = location.state; // Lấy dữ liệu từ state
 
   useEffect(() => {
-    if (bookingDetails) {
-      console.log("Booking Details:", bookingDetails);
-      if (status === "PENDING") {
-        const emailContent = BookingPendingEmail({
-          orderCode: "orderCode",
-          checkInDate: bookingDetails.checkIn,
-          checkOutDate: bookingDetails.checkOut,
-          totalAmount: (
-            bookingDetails.pricePerNight * bookingDetails.numberOfNights
-          ).toString(),
-        });
-        apiClient.sendEmail(
-          bookingDetails.currentUser.email,
-          "😘🤗 Okay! You have chosen offilen payment!",
-          emailContent
-        );
-        console.log("Sending email because status is PENDING");
-      }
+    const currentEmail = localStorage.getItem("email")?.toString();
+    if (status === "PENDING") {
+      // const emailContent = BookingPendingEmail({
+      //   orderCode: "orderCode",
+      //   checkInDate: bookingDetails.checkIn,
+      //   checkOutDate: bookingDetails.checkOut,
+      //   totalAmount: (
+      //     bookingDetails.pricePerNight * bookingDetails.numberOfNights
+      //   ).toString(),
+      // });
+      // apiClient.sendEmail(
+      //   currentEmail,
+      //   "😘🤗 Okay! You have chosen offilen payment!",
+      //   emailContent
+      // );
+      console.log("Sending email because status is PENDING");
     }
-  }, [bookingDetails]);
+  }, []);
 
   // Check status and send email if the status is PAID or CANCELLED
   useEffect(() => {
-    const currentEmail = localStorage.getItem("email")?.toString();
-    if (status === "PAID") {
-      const emailContent = BookingSuccessEmail({ status, orderCode });
-      apiClient.sendEmail(
-        currentEmail,
-        "🛄 Thanks! Your booking is confirmed",
-        emailContent
+    const debounceTimeout = setTimeout(() => {
+      const currentEmail = localStorage.getItem("email")?.toString();
+      const pendingBooking = JSON.parse(
+        localStorage.getItem("pendingBooking") || "{}"
       );
-      console.log("Sending email because status is PAID");
-    } else if (status === "CANCELLED") {
-      const emailContent = BookingCancellationEmail({ status, orderCode });
-      apiClient.sendEmail(currentEmail, "😥 Booking canceled", emailContent);
-      // deleteBookingMutation.mutate(room._id);
-      console.log("Sending email because status is CANCELLED");
-    }
-  }, [status, orderCode]);
+
+      if (status === "PAID" && pendingBooking) {
+        // Gọi API thêm booking vào MongoDB với trạng thái "success"
+        mutation.mutate(
+          {
+            ...pendingBooking,
+            status: "success", // Cập nhật trạng thái thành công cho booking
+          },
+          {
+            onSuccess: (res: any) => {
+              const bookingId = res._id;
+              console.log(res);
+              // Gửi email xác nhận
+              const emailContent = BookingSuccessEmail({ bookingId, status });
+              apiClient.sendEmail(
+                currentEmail,
+                "🛄 Thanks! Your booking is confirmed",
+                emailContent
+              );
+              console.log("Sending email because status is PAID");
+
+              // Xóa booking tạm thời khỏi localStorage
+              localStorage.removeItem("pendingBooking");
+            },
+          }
+        );
+      } else if (status === "CANCELLED") {
+        // Gọi API thêm booking vào MongoDB với trạng thái "success"
+        mutation.mutate(
+          {
+            ...pendingBooking,
+            status: "canceled", // Cập nhật trạng thái thành công cho booking
+          },
+          {
+            onSuccess: (res: any) => {
+              const bookingId = res._id;
+              console.log(res);
+              // Gửi email hủy
+              const emailContent = BookingCancellationEmail({ bookingId, status });
+              apiClient.sendEmail(
+                currentEmail,
+                "😥 Booking canceled",
+                emailContent
+              );
+              console.log("Sending email because status is CANCELLED");
+
+              // Xóa booking tạm thời khỏi localStorage
+              localStorage.removeItem("pendingBooking");
+            },
+          }
+        );
+      }
+    }, 1000); // Adjust timeout as needed
+
+    return () => clearTimeout(debounceTimeout);
+  }, [status]);
 
   return (
     <div className="space-y-3 mt-32 ">

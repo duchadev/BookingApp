@@ -1,11 +1,27 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SignOutButton from "./SignOutButton";
 import Fchat from "./Fchat";
-import { ChartNoAxesCombined, BookCheck  } from 'lucide-react';
+import { ChartNoAxesCombined, BookCheck } from "lucide-react";
+import { registerAsManager, fetchCurrentUser } from "../api-client";
+import { useAppContext } from "../contexts/AppContext";
+
 const Header = () => {
   const isLoggedIn = localStorage.getItem("isLoggedIn");
   const role = localStorage.getItem("role");
-  // const { isLoggedIn } = useAppContext();
+  const { showToast } = useAppContext();
+  const navigate = useNavigate();
+
+  const handleRegisterAsManager = async () => {
+    try {
+      const currentUser = await fetchCurrentUser();
+      const userID = currentUser._id;
+      const response = await registerAsManager(userID);
+      showToast({ message: "Register successfully!", type: "SUCCESS" });
+      navigate("/"); // Optionally redirect on success
+    } catch (error) {
+      showToast({ message: "Fail to become hotel manager", type: "ERROR" });
+    }
+  };
 
   return (
     <div className="bg-blue-500 py-6">
@@ -16,36 +32,41 @@ const Header = () => {
         </span>
         <span className="flex space-x-2">
           {isLoggedIn ? (
-            role === "user" || role === "admin" ? (
-              <>
+            <>
+              {role === "user" && (
                 <Link
                   className="flex items-center text-white px-3 font-bold hover:bg-blue-500"
                   to="/my-bookings"
                 >
-                  <BookCheck size={24} className="mr-2"/>My Bookings
+                  <BookCheck size={24} className="mr-2" />
+                  My Bookings
                 </Link>
-                {role === "admin" && (
-                  <Link
-                    className="flex items-center text-white px-3 font-bold hover:bg-blue-500"
-                    to="/admin/dashboard"
-                  >
-                        <ChartNoAxesCombined size={24} className="mr-2"/>
-                        Dashboard
-                  </Link>
-                )}
-                <SignOutButton />
-              </>
-            ) : (
-              <>
+              )}
+              {role === "admin" && (
+                <Link
+                  className="flex items-center text-white px-3 font-bold hover:bg-blue-500"
+                  to="/admin/dashboard"
+                >
+                  <ChartNoAxesCombined size={24} className="mr-2" />
+                  Dashboard
+                </Link>
+              )}
+              {role === "hotel_manager" && (
                 <Link
                   className="flex items-center text-white px-3 font-bold hover:bg-blue-500"
                   to="/my-hotels"
                 >
                   My Hotels
                 </Link>
-                <SignOutButton />
-              </>
-            )
+              )}
+              <Link
+                className="flex items-center text-white px-3 font-bold hover:bg-blue-500"
+                to="/my-profile"
+              >
+                My Profile
+              </Link>
+              <SignOutButton />
+            </>
           ) : (
             <Link
               to="/sign-in"

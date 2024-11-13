@@ -19,6 +19,7 @@
     "antd": "^5.21.1",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
+    "date-fns": "^4.1.0",
     "font-awesome-icons": "^1.6.0",
     "frontend": "file:",
     "jquery": "^3.7.1",

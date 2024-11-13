@@ -18,8 +18,8 @@ adminRouter.patch(
       // Determine the new verification status
       const status =
         action === "approve" ? "Success" : action === "reject" ? "Fail" : null;
-        console.log("abc", status);
-              if (!status) {
+      console.log("abc", status);
+      if (!status) {
         return res
           .status(400)
           .json({ message: "Invalid action. Use 'approve' or 'reject'." });
@@ -41,16 +41,16 @@ adminRouter.patch(
 
       // Configure nodemailer transporter
       const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        service: "gmail",
         auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
         },
         tls: {
-            rejectUnauthorized: false, // Use this option for testing if you face SSL errors
+          rejectUnauthorized: false, // Use this option for testing if you face SSL errors
         },
-    });
-    
+      });
+
       console.log("email: ", ownerEmail);
       // Set up email options
       const mailOptions = {
@@ -67,12 +67,11 @@ adminRouter.patch(
 
       res.status(200).json({
         message: `Hotel verification status updated to ${status}. Email sent to owner.`,
-        verify: status, 
+        verify: status,
       });
     } catch (error) {
       console.error("Error updating status or sending email:", error);
       res.status(500).json({ message: "Server error.", error });
-
     }
   }
 );
@@ -86,9 +85,10 @@ adminRouter.get(
 
     try {
       // Allow fetching all hotels if verify is not specified or is invalid
-      const query = verify && ["Success", "Fail", "Pending"].includes(verify)
-        ? { verify }
-        : {};
+      const query =
+        verify && ["Success", "Fail", "Pending"].includes(verify)
+          ? { verify }
+          : {};
 
       const hotels = await Hotel.find(query);
       res.status(200).json(hotels); // Directly return the hotels array
@@ -103,12 +103,14 @@ adminRouter.get(
   verifyToken,
   authorizeRoles("admin"),
   async (req, res) => {
-    const verifyUserRequest = req.query.wantToBeHotelManager as string; 
+    const verifyUserRequest = req.query.wantToBeHotelManager as string;
 
     try {
-      const query = verifyUserRequest && ["Approved", "Denied", "Pending", "None"].includes(verifyUserRequest)
-        ? { verifyUserRequest }
-        : {};
+      const query =
+        verifyUserRequest &&
+        ["Approved", "Denied", "Pending", "None"].includes(verifyUserRequest)
+          ? { verifyUserRequest }
+          : {};
 
       const usersReq = await User.find(query);
       res.status(200).json(usersReq); // Directly return the hotels array
@@ -127,16 +129,22 @@ adminRouter.patch(
     const { action } = req.body;
 
     try {
-      const status = action === "approve" ? "Approved" : action === "reject" ? "Denied" : null;
+      const status =
+        action === "approve"
+          ? "Approved"
+          : action === "reject"
+          ? "Denied"
+          : null;
       if (!status) {
-        return res.status(400).json({ message: "Invalid action. Use 'approve' or 'reject'." });
+        return res
+          .status(400)
+          .json({ message: "Invalid action. Use 'approve' or 'reject'." });
       }
 
-      const user = await User.findByIdAndUpdate(
-        userId,
-        { wantToBeHotelManager: status },
-        { new: true }
-      );
+      const user = await User.findByIdAndUpdate(userId, {
+        wantToBeHotelManager: status,
+        role: "hotel_manager",
+      });
 
       if (!user) {
         return res.status(404).json({ message: "User not found." });
@@ -145,13 +153,13 @@ adminRouter.patch(
       const userEmail = user.email;
 
       const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        service: "gmail",
         auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
         },
         tls: {
-            rejectUnauthorized: false,
+          rejectUnauthorized: false,
         },
       });
 
@@ -159,7 +167,9 @@ adminRouter.patch(
         from: process.env.EMAIL_USER,
         to: userEmail,
         subject: `Your Request to be Hotel Owner Status: ${status}`,
-        html: `<p>Your role request has been ${status === "Approved" ? "approved" : "rejected"}.</p>`,
+        html: `<p>Your role request has been ${
+          status === "Approved" ? "approved" : "rejected"
+        }.</p>`,
       };
 
       await transporter.sendMail(mailOptions);
@@ -174,7 +184,7 @@ adminRouter.patch(
     }
   }
 );
-adminRouter.get('/users', async (req, res) => {
+adminRouter.get("/users", async (req, res) => {
   try {
     const users = await User.find(); // Fetch all users
     const userCount = users.length; // Get the length of the users array
@@ -182,9 +192,8 @@ adminRouter.get('/users', async (req, res) => {
     res.json({ userCount }); // Send the count as a response
   } catch (error) {
     console.error("Error fetching users:", error); // Log any errors
-    res.status(500).json({ message: 'Error fetching users' });
+    res.status(500).json({ message: "Error fetching users" });
   }
 });
-
 
 export default adminRouter;

@@ -13,11 +13,13 @@ const bookingSchema = new mongoose.Schema<BookingType>(
       ref: "Hotel",
       required: true,
     },
-    roomId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Room",
-      required: true,
-    },
+    roomIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Room",
+        required: true,
+      },
+    ],
     adultCount: { type: Number, required: true },
     childCount: { type: Number, required: true },
     checkIn: { type: Date, required: true },

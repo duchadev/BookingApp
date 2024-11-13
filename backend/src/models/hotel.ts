@@ -14,8 +14,8 @@ const hotelSchema = new mongoose.Schema<HotelType>(
     country: { type: String, required: true },
     description: { type: String, required: true },
     type: { type: String, required: true }, // e.g. Hotel, Motel, Resort
-    maxAdultCount: { type: Number, required: true },
-    maxChildCount: { type: Number, required: true },
+    // maxAdultCount: { type: Number, required: true },
+    // maxChildCount: { type: Number, required: true },
     facilities: [{ type: String, required: true }],
     starRating: { type: Number, min: 0, max: 5, default: 0 },
     imageUrls: [{ type: String, required: true }],

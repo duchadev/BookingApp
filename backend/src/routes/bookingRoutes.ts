@@ -20,11 +20,14 @@ bookingRouter.post("/check-room-availability", async (req, res) => {
   try {
     const overlappingBookings = await Booking.find({
       roomId,
+      status: { $in: ["success", "pending"] }, // chỉ kiểm tra các booking có status là "success" hoặc "pending"
       $or: [
         { checkIn: { $lt: checkOut, $gte: checkIn } }, // booking overlaps with the range
         { checkOut: { $gt: checkIn, $lte: checkOut } },
       ],
     });
+    console.log(checkIn, checkOut);
+    console.log(overlappingBookings);
 
     if (overlappingBookings.length > 0) {
       return res.json({
@@ -89,12 +92,13 @@ bookingRouter.post(
   authorizeRoles("user", "hotel_manager", "admin"),
   async (req: Request, res: Response) => {
     try {
-      const { hotelId, roomId, checkIn, checkOut } = req.body;
-      console.log("req.body: ", req.body);
+      const { hotelId, roomIds, checkIn, checkOut, status } = req.body;
 
       // Chuyển đổi hotelId từ chuỗi thành ObjectId
       const hotelObjectId = new mongoose.Types.ObjectId(hotelId);
-      const roomObjectId = new mongoose.Types.ObjectId(roomId);
+      const roomObjectIds = roomIds.map(
+        (id) => new mongoose.Types.ObjectId(id)
+      );
 
       // Kiểm tra sự tồn tại của hotelId
       const hotelExists = await Hotel.exists({ _id: hotelObjectId });
@@ -103,42 +107,35 @@ bookingRouter.post(
         return res.status(400).json({ error: "HotelId is not found!" });
       }
 
-      // Kiểm tra sự tồn tại của roomId
-      const roomExists = await Room.exists({ _id: roomObjectId });
-      if (!roomExists) {
-        console.error("RoomId is not found!");
-        return res.status(400).json({ error: "RoomId is not found!" });
+      // Check if each room exists
+      for (const roomId of roomObjectIds) {
+        const roomExists = await Room.exists({ _id: roomId });
+        if (!roomExists) {
+          return res
+            .status(400)
+            .json({ error: `RoomId ${roomId} is not found!` });
+        }
       }
 
-      // Kiểm tra trùng lặp thời gian booking
-      /**
-       * Xác thực thời gian chồng chéo: Phần conflictingBooking tìm kiếm trong bảng Booking để xác định xem có booking nào cùng roomId và hotelId đã được đặt trong khoảng checkIn và checkOut yêu cầu của người dùng hay chưa.
-       * Điều kiện $or với $lt, $gt, $gte, $lte: Điều này giúp tìm các khoảng thời gian có khả năng trùng nhau. Ví dụ, nếu người dùng A đã đặt phòng từ 10h - 12h, thì người dùng B sẽ không thể đặt trong bất kỳ khoảng nào từ 9h - 11h, 11h - 13h, hoặc 10h - 12h. Chỉ từ 12h->max
-       */
-      const conflictingBooking = await Booking.findOne({
-        hotelId,
-        roomId,
-        $or: [
-          {
-            checkIn: { $lt: new Date(checkOut), $gte: new Date(checkIn) },
-          },
-          {
-            checkOut: { $gt: new Date(checkIn), $lte: new Date(checkOut) },
-          },
-          {
-            checkIn: { $lte: new Date(checkIn) },
-            checkOut: { $gte: new Date(checkOut) },
-          },
-        ],
-      });
-
-      if (conflictingBooking) {
-        console.error(
-          "This room is already booked during the selected time slot."
-        );
-        return res.status(400).json({
-          error: "This room is already booked during the selected time slot.",
+      // Kiểm tra nếu đã tồn tại booking với cùng hotelId, roomIds, checkIn, và checkOut
+      for (const roomId of roomObjectIds) {
+        const existingBooking = await Booking.findOne({
+          hotelId,
+          roomIds: roomId,
+          status,
+          checkIn,
+          checkOut,
         });
+        if (existingBooking) {
+          console.info(
+            "Booking already exists for the given time slot. No new booking created."
+          );
+          return res.status(409).json({
+            message: "Booking already exists, no new booking created.",
+          });
+        } else {
+          console.info("New booking created.");
+        }
       }
 
       const newBooking: BookingType = {
@@ -147,6 +144,7 @@ bookingRouter.post(
       };
       const booking = new Booking(newBooking);
       const savedBooking = await booking.save();
+      console.log("savedBooking: ", savedBooking);
       res.status(201).json(savedBooking);
     } catch (error) {
       res
@@ -168,7 +166,7 @@ bookingRouter.get(
       const myBookings = await Booking.find({ userId })
         .populate("userId", "name email")
         .populate("hotelId", "name city country imageUrls")
-        .populate("roomId", "type number")
+        .populate("roomIds", "type number")
         .sort({ createdAt: -1 });
 
       res.status(200).json(myBookings);
@@ -189,9 +187,17 @@ bookingRouter.get(
   async (req: Request, res: Response) => {
     try {
       const booking = await Booking.findById(req.params.id)
-        .populate("userId", "name email") // Populate user details
-        .populate("hotelId", "name location") // Populate hotel details
-        .populate("roomId", "type number"); // Populate room details
+        .populate("userId", "firstName lastName phone email") // Populate user details
+        .populate({
+          path: "hotelId",
+          select:
+            "name city country imageUrls type facilities maxAdultCount maxChildCount userId",
+          populate: {
+            path: "userId", // Populate hotel owner's details from the hotel document
+            select: "firstName lastName phone email",
+          },
+        }) // Populate hotel details with owner
+        .populate("roomIds", "type roomNumber facilities"); // Populate room details
       if (!booking) {
         return res.status(404).json({ error: "Booking not found" });
       }
@@ -261,9 +267,9 @@ bookingRouter.get(
       if (req.query.status) filter["status"] = req.query.status;
 
       const bookings = await Booking.find(filter)
-        .populate("userId", "name email")
+        .populate("userId", "firstName lastName phone email")
         .populate("hotelId", "name location")
-        .populate("roomId", "type number")
+        .populate("roomIds", "type number")
         .sort({ createdAt: -1 });
 
       res.status(200).json(bookings);
